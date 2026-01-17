@@ -70,3 +70,8 @@ int32_t disable_monitor(const Arg *arg);
 int32_t enable_monitor(const Arg *arg);
 int32_t toggle_monitor(const Arg *arg);
 int32_t scroller_stack(const Arg *arg);
+int32_t toggle_monitor(const Arg *arg);
+int32_t setmark(const Arg *arg);
+int32_t focusmark(const Arg *arg);
+int32_t setlocalmark(const Arg *arg);
+int32_t focuslocalmark(const Arg *arg);

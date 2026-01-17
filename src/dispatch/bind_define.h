@@ -86,7 +86,7 @@ int32_t destroy_all_virtual_output(const Arg *arg) {
 	wl_list_for_each_safe(m, tmp, &mons, link) {
 		if (wlr_output_is_headless(m->wlr_output)) {
 			// if(selmon == m)
-			//   selmon = NULL;
+			//	 selmon = NULL;
 			wlr_output_destroy(m->wlr_output);
 			wlr_log(WLR_INFO, "Virtual output destroyed");
 		}
@@ -1257,11 +1257,13 @@ int32_t toggleglobal(const Arg *arg) {
 		selmon->sel->isnamedscratchpad = 0;
 	}
 	selmon->sel->isglobal ^= 1;
+
 	if (selmon->sel->isglobal &&
 		(selmon->sel->prev_in_stack || selmon->sel->next_in_stack)) {
 		exit_scroller_stack(selmon->sel);
 		arrange(selmon, false, false);
 	}
+
 	setborder_color(selmon->sel);
 	return 0;
 }
@@ -1729,5 +1731,154 @@ int32_t scroller_stack(const Arg *arg) {
 	}
 
 	arrange(selmon, false, false);
+	return 0;
+}
+
+int32_t setmark(const Arg *arg) {
+	if (!selmon) {
+		return 0;
+	}
+
+	Client *focusedClient = selmon->sel;
+	if (!focusedClient) {
+		return 0;
+	}
+
+	int32_t mark_id = arg->i;
+
+	if (mark_id < 0 || mark_id > MAX_MARKS) {
+		return 0;
+	}
+
+	if (marks[mark_id] && marks[mark_id] != focusedClient) {
+		marks[mark_id]->mark = -1;
+	}
+
+	focusedClient->mark = mark_id;
+	marks[mark_id] = focusedClient;
+	return 0;
+}
+
+int32_t focusmark(const Arg *arg) {
+	int32_t mark_id = arg->i;
+
+	if (mark_id < 0 || mark_id > MAX_MARKS) {
+		return 0;
+	}
+
+	Client *markedClient = marks[mark_id];
+
+	if (!markedClient) {
+		return 0;
+	}
+
+	if (markedClient->mon != selmon) {
+		selmon = markedClient->mon;
+	}
+
+	uint32_t currentMonitorTag =
+		markedClient->mon->tagset[markedClient->mon->seltags];
+
+	if (!(markedClient->tags & currentMonitorTag)) {
+		view_in_mon(&(Arg){.ui = markedClient->tags}, true, markedClient->mon,
+					true);
+	}
+
+	focusclient(markedClient, 1);
+
+	if (warpcursor) {
+		warp_cursor(markedClient);
+	}
+
+	return 0;
+}
+
+int32_t setlocalmark(const Arg *arg) {
+	if (!selmon) {
+		return 0;
+	}
+
+	Client *focusedClient = selmon->sel;
+	if (!focusedClient) {
+		return 0;
+	}
+
+	int32_t mark_id = arg->i;
+	if (mark_id < 0 || mark_id > MAX_MARKS) {
+		return 0;
+	}
+
+	{
+		Client *c = focusedClient;
+		if (!c->mon)
+			goto noMonitor;
+
+		size_t max_local_marks =
+			sizeof(c->mon->local_marks) / sizeof(c->mon->local_marks[0]);
+		if (c->local_mark >= 0 && c->local_mark < MAX_MARKS) {
+			for (int tag = 0; tag < MAX_TAGS; tag++) {
+				if (c->mon->local_marks[tag][c->local_mark] == c) {
+					c->mon->local_marks[tag][c->local_mark] = NULL;
+					break;
+				}
+			}
+		}
+
+	noMonitor:
+	};
+
+	{
+		Client *c = focusedClient;
+		uint32_t tagset = selmon->tagset[selmon->seltags];
+		for (int tag = 0; tag < MAX_TAGS; tag++) {
+			if (tagset & (1 << tag)) {
+				if (selmon->local_marks[tag][mark_id] &&
+					selmon->local_marks[tag][mark_id] != focusedClient) {
+					selmon->local_marks[tag][mark_id]->local_mark = -1;
+				}
+				selmon->local_marks[tag][mark_id] = c;
+				break;
+			}
+		}
+		c->local_mark = mark_id;
+	}
+
+	return 0;
+}
+
+int32_t focuslocalmark(const Arg *arg) {
+	int32_t mark_id = arg->i;
+
+	if (mark_id < 0 || mark_id > MAX_MARKS) {
+		return 0;
+	}
+
+	uint32_t tagset = selmon->tagset[selmon->seltags];
+	Client *c = NULL;
+	for (int tag = 0; tag < MAX_TAGS; tag++) {
+		if (tagset & (1 << tag)) {
+			c = selmon->local_marks[tag][mark_id];
+			break;
+		}
+	}
+
+	if (!c) {
+		return 0;
+	}
+
+	if (c->mon != selmon) {
+		selmon = c->mon;
+	}
+
+	if (!(c->tags & c->mon->tagset[c->mon->seltags])) {
+		view_in_mon(&(Arg){.ui = c->tags}, true, c->mon, true);
+	}
+
+	focusclient(c, 1);
+
+	if (warpcursor) {
+		warp_cursor(c);
+	}
+
 	return 0;
 }
