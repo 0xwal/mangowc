@@ -1097,6 +1097,12 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = dec_opacity;
 	} else if (strcmp(func_name, "clear_custom_opacity") == 0) {
 		func = clear_custom_opacity;
+	} else if (strcmp(func_name, "setmark") == 0) {
+		func = setmark;
+		(*arg).i = atoi(arg_value);
+	} else if (strcmp(func_name, "focusmark") == 0) {
+		func = focusmark;
+		(*arg).i = atoi(arg_value);
 	} else {
 		return NULL;
 	}

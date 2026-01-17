@@ -1784,5 +1784,52 @@ int32_t clear_custom_opacity(const Arg *arg) {
 
 	c->custom_opacity = 0.0f;
 	client_set_opacity(c, c->focused_opacity);
+
+	return 0;
+}
+
+int32_t setmark(const Arg *arg) {
+	Client *c = selmon ? selmon->sel : NULL;
+	int32_t mark_id = arg->i;
+
+	if (!c || mark_id < 0 || mark_id > 9) {
+		return 0;
+	}
+
+	if (marks[mark_id] && marks[mark_id] != c) {
+		marks[mark_id]->mark = -1;
+	}
+
+	c->mark = mark_id;
+	marks[mark_id] = c;
+	return 0;
+}
+
+int32_t focusmark(const Arg *arg) {
+	int32_t mark_id = arg->i;
+
+	if (mark_id < 0 || mark_id > 9) {
+		return 0;
+	}
+
+	Client *c = marks[mark_id];
+	if (!c) {
+		return 0;
+	}
+
+	if (c->mon != selmon) {
+		selmon = c->mon;
+	}
+
+	if (!(c->tags & c->mon->tagset[c->mon->seltags])) {
+		view_in_mon(&(Arg){.ui = c->tags}, true, c->mon, true);
+	}
+
+	focusclient(c, 1);
+
+	if (warpcursor) {
+		warp_cursor(c);
+	}
+
 	return 0;
 }

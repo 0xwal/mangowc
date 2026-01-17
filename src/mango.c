@@ -417,6 +417,7 @@ struct Client {
 	bool isfocusing;
 	struct Client *next_in_stack;
 	struct Client *prev_in_stack;
+	int32_t mark;
 };
 
 typedef struct {
@@ -867,6 +868,8 @@ bool render_border = true;
 uint32_t chvt_backup_tag = 0;
 bool allow_frame_scheduling = true;
 char chvt_backup_selmon[32] = {0};
+
+static Client *marks[10] = {NULL};
 
 struct dvec2 *baked_points_move;
 struct dvec2 *baked_points_open;
@@ -3159,6 +3162,11 @@ destroynotify(struct wl_listener *listener, void *data) {
 		wl_list_remove(&c->map.link);
 		wl_list_remove(&c->unmap.link);
 	}
+
+	if (c->mark >= 0 && c->mark < 10 && marks[c->mark] == c) {
+		marks[c->mark] = NULL;
+	}
+
 	free(c);
 }
 
@@ -3775,6 +3783,7 @@ void init_client_properties(Client *c) {
 	c->stack_proportion = 0.0f;
 	c->next_in_stack = NULL;
 	c->prev_in_stack = NULL;
+	c->mark = -1;
 }
 
 void // old fix to 0.5
