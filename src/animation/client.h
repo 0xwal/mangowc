@@ -1126,7 +1126,8 @@ bool client_apply_focus_opacity(Client *c) {
 
 	if (c->isfullscreen) {
 		c->opacity_animation.running = false;
-		client_set_opacity(c, 1);
+		client_set_opacity(
+			c, config.allow_fullscreen_opacity ? opacity : 1.0f);
 	} else if (c->animation.running && c->animation.action == OPEN) {
 		c->opacity_animation.running = false;
 		struct timespec now;
