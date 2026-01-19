@@ -1086,6 +1086,12 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 	} else if (strcmp(func_name, "focusmark") == 0) {
 		func = focusmark;
 		(*arg).i = atoi(arg_value);
+	} else if (strcmp(func_name, "setlocalmark") == 0) {
+		func = setlocalmark;
+		(*arg).i = atoi(arg_value);
+	} else if (strcmp(func_name, "focuslocalmark") == 0) {
+		func = focuslocalmark;
+		(*arg).i = atoi(arg_value);
 	} else {
 		return NULL;
 	}

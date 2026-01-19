@@ -408,6 +408,7 @@ struct Client {
 	float scroller_proportion_single;
 	bool isfocusing;
 	int32_t mark;
+	int32_t local_mark;
 };
 
 typedef struct {
@@ -479,6 +480,13 @@ typedef struct {
 	uint32_t id;
 } Layout;
 
+
+
+#include "config/preset.h"
+
+#define MAX_MARKS 9
+#define MAX_TAGS 9
+
 struct Monitor {
 	struct wl_list link;
 	struct wlr_output *wlr_output;
@@ -514,6 +522,7 @@ struct Monitor {
 	struct wlr_scene_optimized_blur *blur;
 	char last_surface_ws_name[256];
 	struct wlr_ext_workspace_group_handle_v1 *ext_group;
+	Client *local_marks[LENGTH(tags)][MAX_MARKS];
 };
 
 typedef struct {
@@ -850,7 +859,7 @@ uint32_t chvt_backup_tag = 0;
 bool allow_frame_scheduling = true;
 char chvt_backup_selmon[32] = {0};
 
-static Client *marks[10] = {NULL};
+static Client *marks[MAX_MARKS] = {NULL};
 
 struct dvec2 *baked_points_move;
 struct dvec2 *baked_points_open;
@@ -876,7 +885,6 @@ static struct {
 } last_cursor;
 
 #include "client/client.h"
-#include "config/preset.h"
 
 struct Pertag {
 	uint32_t curtag, prevtag;			/* current and previous tag */
@@ -2682,6 +2690,14 @@ void createmon(struct wl_listener *listener, void *data) {
 	float scale = 1;
 	m->mfact = default_mfact;
 	m->nmaster = default_nmaster;
+
+	/* Initialize local marks array */
+	for (ji = 0; ji < MAX_TAGS; ji++) {
+		for (jk = 0; jk < MAX_MARKS; jk++) {
+			m->local_marks[ji][jk] = NULL;
+		}
+	}
+
 	enum wl_output_transform rr = WL_OUTPUT_TRANSFORM_NORMAL;
 	wlr_output_state_set_scale(&state, scale);
 	wlr_output_state_set_transform(&state, rr);
@@ -3137,8 +3153,18 @@ destroynotify(struct wl_listener *listener, void *data) {
 		wl_list_remove(&c->unmap.link);
 	}
 
-	if (c->mark >= 0 && c->mark < 10 && marks[c->mark] == c) {
+	if (c->mark >= 0 && c->mark < MAX_MARKS && marks[c->mark] == c) {
 		marks[c->mark] = NULL;
+	}
+
+	/* Clear local mark if client has one */
+	if (c->local_mark >= 0 && c->local_mark < MAX_MARKS && c->mon) {
+		for (int tag = 0; tag < MAX_TAGS; tag++) {
+			if (c->mon->local_marks[tag][c->local_mark] == c) {
+				c->mon->local_marks[tag][c->local_mark] = NULL;
+				break;
+			}
+		}
 	}
 
 	free(c);
@@ -3753,6 +3779,7 @@ void init_client_properties(Client *c) {
 	c->float_geom.x = 0;
 	c->float_geom.y = 0;
 	c->mark = -1;
+	c->local_mark = -1;
 }
 
 void // old fix to 0.5
@@ -5268,6 +5295,20 @@ void tag_client(const Arg *arg, Client *target_client) {
 
 		target_client->tags = arg->ui & TAGMASK;
 		target_client->istagswitching = 1;
+
+		/* Clear local mark when tags change */
+		if (target_client->local_mark >= 0 && target_client->local_mark < 10 &&
+			target_client->mon) {
+			for (int tag = 0; tag < MAX_TAGS; tag++) {
+				if (target_client->mon
+						->local_marks[tag][target_client->local_mark] ==
+					target_client) {
+					target_client->mon
+						->local_marks[tag][target_client->local_mark] = NULL;
+				}
+			}
+			target_client->local_mark = -1;
+		}
 
 		wl_list_for_each(fc, &clients, link) {
 			if (fc && fc != target_client && target_client->tags & fc->tags &&
