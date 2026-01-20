@@ -153,7 +153,7 @@ Client *center_tiled_select(Monitor *m) {
 	}
 	return target_c;
 }
-Client *find_client_by_direction(Client *tc, const Arg *arg, bool findfloating,
+Client *find_client_by_direction(Client *tc, const Arg *arg, WindowType mode,
 								 bool ignore_align) {
 	Client *c = NULL;
 	Client **tempClients = NULL; // 初始化为 NULL
@@ -161,7 +161,15 @@ Client *find_client_by_direction(Client *tc, const Arg *arg, bool findfloating,
 
 	// 第一次遍历，计算客户端数量
 	wl_list_for_each(c, &clients, link) {
-		if (c && (findfloating || !c->isfloating) && !c->isunglobal &&
+		if (c && (mode == WIN_FLOATING && !c->isfloating)) {
+			continue;
+		}
+
+		if (c && (mode == WIN_TILED && c->isfloating)) {
+			continue;
+		}
+
+		if (c && !c->isunglobal &&
 			(focus_cross_monitor || c->mon == tc->mon) &&
 			(c->tags & c->mon->tagset[c->mon->seltags])) {
 			last++;
@@ -179,10 +187,19 @@ Client *find_client_by_direction(Client *tc, const Arg *arg, bool findfloating,
 		return NULL;
 	}
 
+
 	// 第二次遍历，填充 tempClients
 	last = -1;
 	wl_list_for_each(c, &clients, link) {
-		if (c && (findfloating || !c->isfloating) && !c->isunglobal &&
+		if (c && (mode == WIN_FLOATING && !c->isfloating)) {
+			continue;
+		}
+
+		if (c && (mode == WIN_TILED && c->isfloating)) {
+			continue;
+		}
+
+		if (c && !c->isunglobal &&
 			(focus_cross_monitor || c->mon == tc->mon) &&
 			(c->tags & c->mon->tagset[c->mon->seltags])) {
 			last++;
@@ -190,12 +207,14 @@ Client *find_client_by_direction(Client *tc, const Arg *arg, bool findfloating,
 		}
 	}
 
+
 	int32_t sel_x = tc->geom.x;
 	int32_t sel_y = tc->geom.y;
 	int64_t distance = LLONG_MAX;
 	int64_t same_monitor_distance = LLONG_MAX;
 	Client *tempFocusClients = NULL;
 	Client *tempSameMonitorFocusClients = NULL;
+
 
 	switch (arg->i) {
 	case UP:
@@ -452,8 +471,10 @@ Client *direction_select(const Arg *arg) {
 		return NULL;
 	}
 
+	WindowType mode = arg->i2;
+
 	return find_client_by_direction(
-		tc, arg, true,
+		tc, arg, mode,
 		(is_scroller_layout(selmon) || is_centertile_layout(selmon)) &&
 			!selmon->isoverview);
 }
@@ -604,15 +625,20 @@ Client *get_focused_stack_client(Client *sc) {
 	Client *tc = NULL;
 	Client *fc = focustop(sc->mon);
 
-	if (fc->isfloating || sc->isfloating)
+	if (sc->isfloating)
 		return sc;
 
 	wl_list_for_each(tc, &fstack, flink) {
 		if (tc->iskilling || tc->isunglobal)
 			continue;
+
 		if (!VISIBLEON(tc, sc->mon))
 			continue;
+
 		if (tc == fc)
+			continue;
+
+		if (tc->isfloating)
 			continue;
 
 		if (client_is_in_same_stack(sc, tc, fc)) {

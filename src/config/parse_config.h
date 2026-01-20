@@ -507,6 +507,26 @@ int32_t parse_direction(const char *str) {
 	}
 }
 
+WindowType parse_direction_mode(const char *str) {
+	char lowerStr[10];
+	int32_t i = 0;
+	while (str[i] && i < 9) {
+		lowerStr[i] = tolower(str[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "any") == 0) {
+		return WIN_ANY;
+	} else if (strcmp(lowerStr, "tiled") == 0) {
+		return WIN_TILED;
+	} else if (strcmp(lowerStr, "floating") == 0) {
+		return WIN_FLOATING;
+	} else {
+		return WIN_ANY;
+	}
+}
+
 int32_t parse_fold_state(const char *str) {
 	// 将输入字符串转换为小写
 	char lowerStr[10];
@@ -830,6 +850,9 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = focusstack;
 		(*arg).i = parse_circle_direction(arg_value);
 	} else if (strcmp(func_name, "focusdir") == 0) {
+		(*arg).i = parse_direction(arg_value);
+		(*arg).i2 = parse_direction_mode(arg_value2);
+
 		func = focusdir;
 		(*arg).i = parse_direction(arg_value);
 	} else if (strcmp(func_name, "incnmaster") == 0) {

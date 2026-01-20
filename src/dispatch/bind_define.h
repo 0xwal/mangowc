@@ -1638,7 +1638,7 @@ int32_t scroller_stack(const Arg *arg) {
 		c->mon->pertag->ltidxs[c->mon->pertag->curtag]->id == SCROLLER ? true
 																	   : false;
 
-	Client *target_client = find_client_by_direction(c, arg, false, true);
+	Client *target_client = find_client_by_direction(c, arg, WIN_TILED, true);
 
 	if (target_client && (!client_only_in_one_tag(target_client) ||
 						  target_client->isglobal || target_client->isunglobal))
