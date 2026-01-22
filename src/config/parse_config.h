@@ -222,6 +222,8 @@ typedef struct {
 	float *scroller_proportion_preset;
 	int32_t scroller_proportion_preset_count;
 
+	int32_t scratchpad_focus_first;
+
 	char **circle_layout;
 	int32_t circle_layout_count;
 
@@ -1315,6 +1317,8 @@ void parse_option(Config *config, char *key, char *value) {
 		config->shadows_position_y = atoi(value);
 	} else if (strcmp(key, "single_scratchpad") == 0) {
 		config->single_scratchpad = atoi(value);
+	} else if (strcmp(key, "scratchpad_focus_first") == 0) {
+		config->scratchpad_focus_first = atoi(value);
 	} else if (strcmp(key, "xwayland_persistence") == 0) {
 		config->xwayland_persistence = atoi(value);
 	} else if (strcmp(key, "syncobj_enable") == 0) {
@@ -2823,6 +2827,7 @@ void override_config(void) {
 		CLAMP_INT(config.cursor_hide_timeout, 0, 36000); // 0-10小时
 	drag_tile_to_tile = CLAMP_INT(config.drag_tile_to_tile, 0, 1);
 	single_scratchpad = CLAMP_INT(config.single_scratchpad, 0, 1);
+	scratchpad_focus_first = CLAMP_INT(config.scratchpad_focus_first, 0, 1);
 
 	// 键盘设置
 	repeat_rate = CLAMP_INT(config.repeat_rate, 1, 1000);
