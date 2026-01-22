@@ -1140,7 +1140,17 @@ bool switch_scratchpad_client_state(Client *c) {
 		return true;
 	} else if (c->is_in_scratchpad && c->is_scratchpad_show &&
 			   (c->mon->tagset[c->mon->seltags] & c->tags) != 0) {
-		set_minimized(c);
+		if (scratchpad_focus_first) {
+			Client *focused = focustop(c->mon);
+			if (focused == c) {
+				set_minimized(c);
+			} else {
+				focusclient(c, 1);
+			}
+		} else {
+			set_minimized(c);
+		}
+
 		return true;
 	} else if (c && c->is_in_scratchpad && !c->is_scratchpad_show) {
 		show_scratchpad(c);

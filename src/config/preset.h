@@ -161,6 +161,7 @@ int32_t disable_while_typing = 1;
 int32_t left_handed = 0;
 int32_t middle_button_emulation = 0;
 int32_t single_scratchpad = 1;
+int32_t scratchpad_focus_first = 0;
 int32_t edge_scroller_pointer_focus = 1;
 
 /* You can choose between:
