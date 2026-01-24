@@ -1833,3 +1833,46 @@ int32_t focusmark(const Arg *arg) {
 
 	return 0;
 }
+
+int32_t movewindowstotag(const Arg *arg) {
+	Monitor *currentMonitor = selmon;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	uint32_t currentMonitorTag =
+		currentMonitor->tagset[currentMonitor->seltags];
+	Client *focusedWindow = currentMonitor->sel;
+
+	uint32_t targetTag = arg->ui & TAGMASK;
+
+	MoveAllMode movingMode = arg->i;
+
+	Client *c = NULL;
+	wl_list_for_each(c, &clients, link) {
+		if (currentMonitorTag & c->tags) {
+			c->tags = targetTag;
+			continue;
+		}
+
+		switch (movingMode) {
+		case MOVE_ALL_SWAP:
+			if (c->tags & targetTag) {
+				c->tags = currentMonitorTag;
+			}
+			break;
+
+		case MOVE_ALL_NORMAL:
+		case MOVE_ALL_FALLBACK:
+		default:
+			break;
+		}
+	}
+
+	arrange(currentMonitor, false, false);
+	view(arg, false);
+
+	focusclient(focusedWindow, 1);
+	return 0;
+}

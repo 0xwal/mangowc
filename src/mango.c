@@ -171,11 +171,9 @@ enum {
 #endif
 enum { UP, DOWN, LEFT, RIGHT, UNDIR }; /* smartmovewin */
 
-typedef enum {
-	WIN_ANY,
-	WIN_TILED,
-	WIN_FLOATING
-} WindowType;
+typedef enum { WIN_ANY, WIN_TILED, WIN_FLOATING } WindowType;
+
+typedef enum { MOVE_ALL_NORMAL, MOVE_ALL_SWAP, MOVE_ALL_FALLBACK } MoveAllMode;
 
 enum { NONE, OPEN, MOVE, CLOSE, TAG, FOCUS, OPAFADEIN, OPAFADEOUT };
 enum { UNFOLD, FOLD, INVALIDFOLD };

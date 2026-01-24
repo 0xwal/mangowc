@@ -529,6 +529,26 @@ WindowType parse_direction_mode(const char *str) {
 	}
 }
 
+WindowType parse_move_all_mode(const char *str) {
+	char lowerStr[10];
+	int32_t i = 0;
+	while (str[i] && i < 9) {
+		lowerStr[i] = tolower(str[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "normal") == 0) {
+		return MOVE_ALL_NORMAL;
+	} else if (strcmp(lowerStr, "swap") == 0) {
+		return MOVE_ALL_SWAP;
+	} else if (strcmp(lowerStr, "fallback") == 0) {
+		return MOVE_ALL_FALLBACK;
+	} else {
+		return MOVE_ALL_NORMAL;
+	}
+}
+
 int32_t parse_fold_state(const char *str) {
 	// 将输入字符串转换为小写
 	char lowerStr[10];
@@ -884,9 +904,10 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 	} else if (strcmp(func_name, "viewtoleft") == 0) {
 		func = viewtoleft;
 		(*arg).i = atoi(arg_value);
-	} else if (strcmp(func_name, "viewtoright") == 0) {
-		func = viewtoright;
-		(*arg).i = atoi(arg_value);
+	} else if (strcmp(func_name, "movewindowstotag") == 0) {
+		func = movewindowstotag;
+		(*arg).ui = 1 << (atoi(arg_value) - 1);
+		(*arg).i = parse_move_all_mode(arg_value2);
 	} else if (strcmp(func_name, "tagsilent") == 0) {
 		func = tagsilent;
 		(*arg).ui = 1 << (atoi(arg_value) - 1);

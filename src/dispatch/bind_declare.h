@@ -76,3 +76,4 @@ int32_t dec_opacity(const Arg *arg);
 int32_t clear_custom_opacity(const Arg *arg);
 int32_t setmark(const Arg *arg);
 int32_t focusmark(const Arg *arg);
+int32_t movewindowstotag(const Arg *arg);
