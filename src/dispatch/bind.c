@@ -2776,7 +2776,6 @@ int32_t movewindowstotag(const Arg *arg) {
 	return 0;
 }
 
-
 int32_t toggle_noautofocus(const Arg *arg) {
 	Monitor *currentMonitor = server.selected_monitor;
 
@@ -2794,6 +2793,21 @@ int32_t toggle_noautofocus(const Arg *arg) {
 
 		client_set_floating(focusedWindow, focusedWindow->isfloating);
 	}
-	
+
+	return 0;
+}
+
+int32_t toggle_shadow(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->isnoshadow ^= 1;
+	wlr_scene_node_set_enabled(&focusedWindow->shadow->node,
+							   focusedWindow->isnoshadow ? false : true);
 	return 0;
 }
