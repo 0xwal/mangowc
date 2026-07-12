@@ -471,6 +471,7 @@ struct Client {
 	Client *group_next;
 	bool isgroupfocusing;
 	bool is_logic_hide;
+	int32_t mark;
 };
 
 typedef struct {
@@ -1049,6 +1050,7 @@ bool render_border = true;
 uint32_t chvt_backup_tag = 0;
 bool allow_frame_scheduling = true;
 char chvt_backup_selmon[32] = {0};
+static Client *marks[10] = {NULL};
 
 struct dvec2 *baked_points_move;
 struct dvec2 *baked_points_open;
@@ -4002,6 +4004,11 @@ destroynotify(struct wl_listener *listener, void *data) {
 		wl_list_remove(&c->map.link);
 		wl_list_remove(&c->unmap.link);
 	}
+
+	if (c->mark >= 0 && c->mark < 10 && marks[c->mark] == c) {
+		marks[c->mark] = NULL;
+	}
+
 	free(c);
 }
 
@@ -4719,6 +4726,7 @@ void init_client_properties(Client *c) {
 		   sizeof(c->opacity_animation.current_border_color));
 	c->opacity_animation.initial_opacity = c->unfocused_opacity;
 	c->opacity_animation.current_opacity = c->unfocused_opacity;
+	c->mark = -1;
 	c->animation.tagining = false;
 	c->animation.running = false;
 	c->animation.overining = false;
