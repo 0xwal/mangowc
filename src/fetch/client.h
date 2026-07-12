@@ -164,8 +164,8 @@ Client *center_tiled_select(Monitor *m) {
 	return target_c;
 }
 
-Client *find_client_by_direction(Client *tc, const Arg *arg,
-								 bool findfloating) {
+Client *find_client_by_direction(Client *tc, const Arg *arg, WindowType mode,
+								 bool ignore_align) {
 	Client *c = NULL;
 	Client *tempFocusClients = NULL;
 	Client *tempSameMonitorFocusClients = NULL;
@@ -186,7 +186,9 @@ Client *find_client_by_direction(Client *tc, const Arg *arg,
 		wl_list_for_each(c, &clients, link) {
 			if (!c || !c->mon || c == tc)
 				continue;
-			if (!findfloating && c->isfloating)
+			if (mode == WIN_TILED && c->isfloating)
+				continue;
+			if (mode == WIN_FLOATING && !c->isfloating)
 				continue;
 			if (!VISIBLEON(c, c->mon))
 				continue;
@@ -258,7 +260,7 @@ Client *find_client_by_direction(Client *tc, const Arg *arg,
 				if (!tc->mon->isoverview &&
 					!client_is_in_same_stack(tc, c, NULL))
 					continue;
-				if (orth_dist != 0)
+				if (!ignore_align && orth_dist != 0)
 					continue;
 			}
 
@@ -305,7 +307,12 @@ Client *direction_select(const Arg *arg) {
 		return NULL;
 	}
 
-	return find_client_by_direction(tc, arg, true);
+	WindowType mode = arg->i2;
+
+	return find_client_by_direction(
+		tc, arg, mode,
+		(is_scroller_layout(selmon) || is_centertile_layout(selmon)) &&
+			!selmon->isoverview);
 }
 
 /* We probably should change the name of this, it sounds like
@@ -443,7 +450,7 @@ Client *get_focused_stack_client(Client *sc, Client *custom_focus_client) {
 	Client *tc = NULL;
 	Client *fc = custom_focus_client ? custom_focus_client : selmon->sel;
 
-	if (fc->isfloating || sc->isfloating)
+	if (sc->isfloating)
 		return sc;
 
 	wl_list_for_each(tc, &fstack, flink) {
@@ -452,6 +459,9 @@ Client *get_focused_stack_client(Client *sc, Client *custom_focus_client) {
 		if (!VISIBLEON(tc, sc->mon))
 			continue;
 		if (tc == fc)
+			continue;
+
+		if (tc->isfloating)
 			continue;
 
 		if (client_is_in_same_stack(sc, tc, fc)) {

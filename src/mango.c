@@ -210,6 +210,13 @@ enum {
 }; /* EWMH atoms */
 #endif
 enum { UP, DOWN, LEFT, RIGHT, UNDIR }; /* smartmovewin */
+
+typedef enum {
+	WIN_ANY,
+	WIN_TILED,
+	WIN_FLOATING
+} WindowType;
+
 enum { NONE, OPEN, MOVE, CLOSE, TAG, FOCUS, OPAFADEIN, OPAFADEOUT, OVERVIEW };
 enum { UNFOLD, FOLD, INVALIDFOLD };
 enum { PREV, NEXT };
@@ -896,7 +903,7 @@ static float *get_border_color(Client *c);
 static void clear_fullscreen_and_maximized_state(Monitor *m);
 static void request_fresh_all_monitors(void);
 static Client *find_client_by_direction(Client *tc, const Arg *arg,
-										bool findfloating);
+										WindowType mode, bool ignore_align);
 static void exit_scroller_stack(Client *c);
 static Client *scroll_get_stack_head_client(Client *c);
 static bool client_only_in_one_tag(Client *c);
