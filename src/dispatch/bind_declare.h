@@ -94,3 +94,4 @@ void focusmark(const Arg *arg);
 void movewindowstotag(const Arg *arg);
 void toggle_noautofocus(const Arg *arg);
 void toggle_shadow(const Arg *arg);
+void toggle_blur(const Arg *arg);
