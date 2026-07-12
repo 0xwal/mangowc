@@ -225,6 +225,7 @@ struct Client {
 	Client *group_prev;
 	Client *group_next;
 	bool isgroupfocusing;
+	float custom_opacity;
 };
 
 void client_update_geometry(Client *c);

@@ -2007,6 +2007,8 @@ void init_client_properties(Client *c) {
 
 	wl_list_init(&c->link);
 	wl_list_init(&c->flink);
+
+	c->custom_opacity = 0;
 }
 
 void handle_client_map(struct wl_listener *listener, void *data) {
