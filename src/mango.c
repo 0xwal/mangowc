@@ -510,6 +510,7 @@ struct Client {
 	Client *group_next;
 	bool isgroupfocusing;
 	bool is_logic_hide;
+	int32_t mark;
 };
 
 typedef struct {
@@ -1189,6 +1190,7 @@ bool render_border = true;
 uint32_t chvt_backup_tag = 0;
 bool allow_frame_scheduling = true;
 char chvt_backup_selmon[32] = {0};
+static Client *marks[10] = {NULL};
 
 struct dvec2 *baked_points_move;
 struct dvec2 *baked_points_open;

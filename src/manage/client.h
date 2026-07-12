@@ -1787,6 +1787,7 @@ void init_client_properties(Client *c) {
 	wl_list_init(&c->link);
 	wl_list_init(&c->flink);
 	c->custom_opacity = 0;
+	c->mark = -1;
 }
 
 void // old fix to 0.5
@@ -2202,6 +2203,11 @@ destroynotify(struct wl_listener *listener, void *data) {
 		wl_list_remove(&c->destroy_decoration.link);
 		wl_list_remove(&c->set_decoration_mode.link);
 	}
+
+	if (c->mark >= 0 && c->mark < 10 && marks[c->mark] == c) {
+		marks[c->mark] = NULL;
+	}
+
 	free(c);
 }
 
