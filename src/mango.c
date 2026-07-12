@@ -377,6 +377,7 @@ struct Client {
 	uint32_t bw;
 	uint32_t tags, oldtags, mini_restore_tag;
 	bool dirty;
+	uint32_t noautofocus;
 	uint32_t configure_serial;
 	struct wlr_foreign_toplevel_handle_v1 *foreign_toplevel;
 	int32_t isfloating, isurgent, isfullscreen, isfakefullscreen,
@@ -728,7 +729,7 @@ static void setcursorshape(struct wl_listener *listener, void *data);
 static void focusclient(Client *c, int32_t lift);
 
 static void setborder_color(Client *c);
-static Client *focustop(Monitor *m);
+static Client *focustop_impl(Monitor *m, bool include_all);
 static void fullscreennotify(struct wl_listener *listener, void *data);
 static void gpureset(struct wl_listener *listener, void *data);
 
@@ -1176,9 +1177,10 @@ static struct wl_event_source *sync_keymap;
 #include "animation/common.h"
 #include "animation/layer.h"
 #include "animation/tag.h"
-#include "dispatch/bind_define.h"
 #include "ext-protocol/all.h"
 #include "fetch/fetch.h"
+#include "input/touch.h"
+#include "dispatch/bind_define.h"
 #include "ipc/ipc.h"
 #include "layout/arrange.h"
 #include "layout/dwindle.h"
@@ -1452,7 +1454,7 @@ bool switch_scratchpad_client_state(Client *c) {
 	} else if (c->is_in_scratchpad && c->is_scratchpad_show &&
 			   (c->mon->tagset[c->mon->seltags] & c->tags) != 0) {
 		if (config.scratchpad_focus_first) {
-			Client *focused = focustop(c->mon);
+			Client *focused = focustop(c->mon, true);
 			if (focused == c) {
 				set_minimized(c);
 			} else {
@@ -1627,6 +1629,7 @@ static void apply_rule_properties(Client *c, const ConfigWinRule *r) {
 	APPLY_INT_PROP(c, r, vrr_only_fullscreen);
 	APPLY_INT_PROP(c, r, isunglobal);
 	APPLY_INT_PROP(c, r, noblur);
+	APPLY_INT_PROP(c, r, noautofocus);
 	APPLY_INT_PROP(c, r, allow_shortcuts_inhibit);
 
 	APPLY_FLOAT_PROP(c, r, scroller_proportion);
@@ -2082,7 +2085,7 @@ void reset_exclusive_layers_focus(Monitor *m) {
 	}
 
 	if (neet_change_focus_to_client) {
-		focusclient(focustop(selmon), 1);
+		focusclient(focustop(selmon, false), 1);
 	}
 }
 
@@ -2797,7 +2800,7 @@ void closemon(Monitor *m) {
 		}
 	}
 	if (selmon) {
-		focusclient(focustop(selmon), 1);
+		focusclient(focustop(selmon, false), 1);
 		printstatus(IPC_WATCH_ARRANGGE);
 	}
 }
@@ -3912,7 +3915,7 @@ void cursorwarptohint(void) {
 
 void destroydragicon(struct wl_listener *listener, void *data) {
 	/* Focus enter isn't sent during drag, so refocus the focused node. */
-	focusclient(focustop(selmon), 1);
+	focusclient(focustop(selmon, false), 1);
 	motionnotify(0, NULL, 0, 0, 0, 0);
 	wl_list_remove(&listener->link);
 	free(listener);
@@ -3948,7 +3951,7 @@ void destroylock(SessionLock *lock, int32_t unlock) {
 		wlr_scene_node_set_enabled(&locked_bg->node, false);
 	}
 
-	focusclient(focustop(selmon), 1);
+	focusclient(focustop(selmon, false), 1);
 	motionnotify(0, NULL, 0, 0, 0, 0);
 
 destroy:
@@ -4732,6 +4735,7 @@ void init_client_properties(Client *c) {
 	c->opacity_animation.initial_opacity = c->unfocused_opacity;
 	c->opacity_animation.current_opacity = c->unfocused_opacity;
 	c->mark = -1;
+	c->noautofocus = 0;
 	c->animation.tagining = false;
 	c->animation.running = false;
 	c->animation.overining = false;
@@ -6952,7 +6956,7 @@ void unmapnotify(struct wl_listener *listener, void *data) {
 		} else if (prev_node && !c->swallowing) {
 			nextfocus = prev_node->client;
 		} else {
-			nextfocus = focustop(selmon);
+			nextfocus = focustop(selmon, false);
 		}
 
 		if (nextfocus) {
@@ -6978,7 +6982,7 @@ void unmapnotify(struct wl_listener *listener, void *data) {
 		if (c == exclusive_focus)
 			exclusive_focus = NULL;
 		if (client_surface(c) == seat->keyboard_state.focused_surface)
-			focusclient(focustop(selmon), 1);
+			focusclient(focustop(selmon, false), 1);
 	} else {
 
 		client_group_detach(c);
@@ -7218,7 +7222,7 @@ urgent(struct wl_listener *listener, void *data) {
 		if (!(c->mon == selmon && c->tags & c->mon->tagset[c->mon->seltags]))
 			view_in_mon(&(Arg){.ui = c->tags}, true, c->mon, true);
 		focusclient(c, 1);
-	} else if (c != focustop(selmon)) {
+	} else if (c != focustop(selmon, false)) {
 		c->isurgent = 1;
 		if (client_surface(c)->mapped)
 			setborder_color(c);
@@ -7279,7 +7283,7 @@ void view_in_mon(const Arg *arg, bool want_animation, Monitor *m,
 toggleseltags:
 
 	if (changefocus)
-		focusclient(focustop(m), 1);
+		focusclient(focustop(m, false), 1);
 	arrange(m, want_animation, true);
 	printstatus(IPC_WATCH_ARRANGGE);
 }
@@ -7443,7 +7447,7 @@ void activatex11(struct wl_listener *listener, void *data) {
 		wlr_xwayland_surface_activate(c->surface.xwayland, 1);
 		focusclient(c, 1);
 		need_arrange = true;
-	} else if (c != focustop(selmon)) {
+	} else if (c != focustop(selmon, false)) {
 		c->isurgent = 1;
 		if (client_surface(c)->mapped)
 			setborder_color(c);

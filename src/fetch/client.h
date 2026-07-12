@@ -318,16 +318,25 @@ Client *direction_select(const Arg *arg) {
 /* We probably should change the name of this, it sounds like
  * will focus the topmost client of this mon, when actually will
  * only return that client */
-Client *focustop(Monitor *m) {
+Client *focustop_impl(Monitor *m, bool include_all) {
 	Client *c = NULL;
 	wl_list_for_each(c, &fstack, flink) {
 		if (c->iskilling || c->isunglobal)
 			continue;
-		if (VISIBLEON(c, m))
-			return c;
+		if (!VISIBLEON(c, m))
+			continue;
+		if (!include_all && c->noautofocus)
+			continue;
+		return c;
 	}
 	return NULL;
 }
+
+// Macro overload: focustop(m) defaults include_all=true, focustop(m, bool) passes through
+#define OVERLOAD_FOCUSTOP_1(m) focustop_impl(m, true)
+#define OVERLOAD_FOCUSTOP_2(m, a) focustop_impl(m, a)
+#define GET_FOCUSTOP_MACRO(_1, _2, NAME, ...) NAME
+#define focustop(...) GET_FOCUSTOP_MACRO(__VA_ARGS__, OVERLOAD_FOCUSTOP_2, OVERLOAD_FOCUSTOP_1)(__VA_ARGS__)
 
 Client *get_next_stack_client(Client *c, bool reverse) {
 	if (!c || !c->mon)
