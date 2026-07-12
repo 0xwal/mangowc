@@ -129,4 +129,9 @@ int32_t toggle_special_tag(const Arg *arg);
 int32_t tag_special_tag(const Arg *arg);
 void toggle_special_tag_mon(Monitor *m);
 int32_t tag_special_silent(const Arg *arg);
+
+int32_t toggle_opacity(const Arg *arg);
+int32_t inc_opacity(const Arg *arg);
+int32_t dec_opacity(const Arg *arg);
+int32_t clear_custom_opacity(const Arg *arg);
 #endif
