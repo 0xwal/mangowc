@@ -2507,3 +2507,17 @@ void toggle_noautofocus(const Arg *arg) {
 	
 	return;
 }
+
+void toggle_shadow(const Arg *arg) {
+	Monitor *currentMonitor = selmon;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->isnoshadow ^= 1;
+	wlr_scene_node_set_enabled(&focusedWindow->shadow->node,
+							   focusedWindow->isnoshadow ? false : true);
+}
