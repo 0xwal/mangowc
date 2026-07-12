@@ -2504,7 +2504,7 @@ void toggle_noautofocus(const Arg *arg) {
 
 		setfloating(focusedWindow, focusedWindow->isfloating);
 	}
-	
+
 	return;
 }
 
@@ -2520,4 +2520,22 @@ void toggle_shadow(const Arg *arg) {
 	focusedWindow->isnoshadow ^= 1;
 	wlr_scene_node_set_enabled(&focusedWindow->shadow->node,
 							   focusedWindow->isnoshadow ? false : true);
+}
+
+static void iter_xdg_scene_buffers(struct wlr_scene_buffer *buffer, int32_t sx,
+								   int32_t sy, void *user_data);
+
+void toggle_blur(const Arg *arg) {
+	Monitor *currentMonitor = selmon;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->noblur ^= 1;
+	wlr_scene_node_for_each_buffer(&focusedWindow->scene_surface->node,
+								   iter_xdg_scene_buffers, focusedWindow);
+	return;
 }
