@@ -1786,6 +1786,7 @@ void init_client_properties(Client *c) {
 	c->animation.tagouted = false;
 	wl_list_init(&c->link);
 	wl_list_init(&c->flink);
+	c->custom_opacity = 0;
 }
 
 void // old fix to 0.5

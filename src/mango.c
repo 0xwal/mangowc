@@ -478,6 +478,7 @@ struct Client {
 	int32_t isunglobal;
 	float focused_opacity;
 	float unfocused_opacity;
+	float custom_opacity;
 	char oldmonname[128];
 	int32_t noblur;
 	float blur_opacity;

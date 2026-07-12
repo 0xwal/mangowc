@@ -1520,10 +1520,17 @@ void client_set_focused_opacity_animation(Client *c) {
 		return;
 	}
 
+	float opacity =
+		c == selmon->sel ? c->focused_opacity : c->unfocused_opacity;
+
+	if (c->custom_opacity > 0.0f) {
+		opacity = c->custom_opacity;
+	}
+
 	c->opacity_animation.duration = config.animation_duration_focus;
 	memcpy(c->opacity_animation.target_border_color, border_color,
 		   sizeof(c->opacity_animation.target_border_color));
-	c->opacity_animation.target_opacity = c->focused_opacity;
+	c->opacity_animation.target_opacity = opacity;
 	c->opacity_animation.time_started = get_now_in_ms();
 	memcpy(c->opacity_animation.initial_border_color,
 		   c->opacity_animation.current_border_color,
@@ -1540,10 +1547,17 @@ void client_set_unfocused_opacity_animation(Client *c) {
 		return;
 	}
 
+	float opacity =
+		c == selmon->sel ? c->focused_opacity : c->unfocused_opacity;
+
+	if (c->custom_opacity > 0.0f) {
+		opacity = c->custom_opacity;
+	}
+
 	c->opacity_animation.duration = config.animation_duration_focus;
 	memcpy(c->opacity_animation.target_border_color, border_color,
 		   sizeof(c->opacity_animation.target_border_color));
-	c->opacity_animation.target_opacity = c->unfocused_opacity;
+	c->opacity_animation.target_opacity = opacity;
 	c->opacity_animation.time_started = get_now_in_ms();
 	memcpy(c->opacity_animation.initial_border_color,
 		   c->opacity_animation.current_border_color,
@@ -1562,6 +1576,13 @@ bool client_apply_focus_opacity(Client *c) {
 	}
 
 	float *border_color = get_border_color(c);
+	float opacity =
+		c == selmon->sel ? c->focused_opacity : c->unfocused_opacity;
+
+	if (c->custom_opacity > 0.0f) {
+		opacity = c->custom_opacity;
+	}
+
 	if (c->isfullscreen) {
 		c->opacity_animation.running = false;
 		client_set_opacity(c, 1);
@@ -1581,8 +1602,6 @@ bool client_apply_focus_opacity(Client *c) {
 		float percent = config.animation_fade_in && !c->nofadein
 							? opacity_eased_progress
 							: 1.0;
-		float opacity =
-			c == selmon->sel ? c->focused_opacity : c->unfocused_opacity;
 		float target_opacity = percent * (1.0 - config.fadein_begin_opacity) +
 							   config.fadein_begin_opacity;
 		if (target_opacity > opacity)
@@ -1636,16 +1655,16 @@ bool client_apply_focus_opacity(Client *c) {
 			return true;
 	} else if (c == selmon->sel) {
 		c->opacity_animation.running = false;
-		c->opacity_animation.current_opacity = c->focused_opacity;
+		c->opacity_animation.current_opacity = opacity;
 		memcpy(c->opacity_animation.current_border_color, border_color,
 			   sizeof(c->opacity_animation.current_border_color));
-		client_set_opacity(c, c->focused_opacity);
+		client_set_opacity(c, opacity);
 	} else {
 		c->opacity_animation.running = false;
-		c->opacity_animation.current_opacity = c->unfocused_opacity;
+		c->opacity_animation.current_opacity = opacity;
 		memcpy(c->opacity_animation.current_border_color, border_color,
 			   sizeof(c->opacity_animation.current_border_color));
-		client_set_opacity(c, c->unfocused_opacity);
+		client_set_opacity(c, opacity);
 	}
 
 	return false;

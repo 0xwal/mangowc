@@ -87,3 +87,7 @@ void dwindle_split_horizontal(const Arg *arg);
 void dwindle_split_vertical(const Arg *arg);
 void dwindle_toggle_current_split(const Arg *arg);
 void focusid(const Arg *arg);
+void toggle_opacity(const Arg *arg);
+void inc_opacity(const Arg *arg);
+void dec_opacity(const Arg *arg);
+void clear_custom_opacity(const Arg *arg);
