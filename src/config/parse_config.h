@@ -325,6 +325,7 @@ typedef struct {
 	float unfocused_opacity;
 	float *scroller_proportion_preset;
 	int32_t scroller_proportion_preset_count;
+	int32_t scratchpad_focus_first;
 
 	char **circle_layout;
 	int32_t circle_layout_count;
@@ -1719,6 +1720,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		config->shadows_position_y = atoi(value);
 	} else if (strcmp(key, "single_scratchpad") == 0) {
 		config->single_scratchpad = atoi(value);
+	} else if (strcmp(key, "scratchpad_focus_first") == 0) {
+		config->scratchpad_focus_first = atoi(value);
 	} else if (strcmp(key, "xwayland_persistence") == 0) {
 		config->xwayland_persistence = atoi(value);
 	} else if (strcmp(key, "xwayland_ignore_scale") == 0) {
@@ -4318,6 +4321,8 @@ void override_config(void) {
 	config.cursor_hide_on_keypress =
 		CLAMP_INT(config.cursor_hide_on_keypress, 0, 1);
 	config.single_scratchpad = CLAMP_INT(config.single_scratchpad, 0, 1);
+	config.scratchpad_focus_first =
+		CLAMP_INT(config.scratchpad_focus_first, 0, 1);
 	config.repeat_rate = CLAMP_INT(config.repeat_rate, 1, 1000);
 	config.repeat_delay = CLAMP_INT(config.repeat_delay, 1, 20000);
 	config.numlockon = CLAMP_INT(config.numlockon, 0, 1);
@@ -4496,6 +4501,7 @@ void set_value_default() {
 	config.trackpad_scroll_factor = 1.0;
 	config.view_current_to_back = 0;
 	config.single_scratchpad = 1;
+	config.scratchpad_focus_first = 0;
 	config.xwayland_persistence = 1;
 	config.xwayland_ignore_scale = 0;
 	config.syncobj_enable = 1;
