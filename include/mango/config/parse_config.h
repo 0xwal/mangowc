@@ -158,6 +158,7 @@ typedef struct {
 	uint32_t passmod;
 	xkb_keysym_t keysym;
 	KeyBinding globalkeybinding;
+	int32_t noautofocus;
 } ConfigWinRule;
 
 typedef struct {
