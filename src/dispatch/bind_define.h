@@ -130,6 +130,38 @@ void exchange_stack_client(const Arg *arg) {
 }
 
 void focusdir(const Arg *arg) {
+	if (arg->i == INDEX && arg->ui > 0) {
+		if (!selmon)
+			return;
+		uint32_t idx = 1;
+		Client *c = NULL;
+		wl_list_for_each(c, &clients, link) {
+			if (c->isunglobal)
+				continue;
+			if (c->mon != selmon)
+				continue;
+			if (!(c->tags & selmon->tagset[selmon->seltags]))
+				continue;
+			if (c->isfloating)
+				continue;
+			if (c->isminimized)
+				continue;
+			if (c->iskilling)
+				continue;
+		// if (c->ismaximizescreen)
+		// 	continue;
+		// if (c->isfullscreen)
+		// 	continue;
+			if (idx == arg->ui) {
+				focusclient(c, 1);
+				if (config.warpcursor)
+					warp_cursor(c);
+				return;
+			}
+			idx++;
+		}
+		return;
+	}
 
 	if (!selmon)
 		return;
