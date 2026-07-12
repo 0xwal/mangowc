@@ -2573,7 +2573,6 @@ int32_t scroller_stack(const Arg *arg) {
 
 	Client *target_client = find_client_by_direction(c, arg, WIN_TILED);
 
-
 	scroller_apply_stack(c, target_client, arg->i);
 	return 0;
 }
@@ -2768,5 +2767,48 @@ int32_t clear_custom_opacity(const Arg *arg) {
 
 	c->custom_opacity = 0.0f;
 	client_set_opacity(c, c->focused_opacity);
+	return 0;
+}
+
+int32_t movewindowstotag(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	uint32_t currentMonitorTag =
+		currentMonitor->tagset[currentMonitor->seltags];
+	Client *focusedWindow = currentMonitor->sel;
+
+	uint32_t targetTag = arg->ui & TAGMASK;
+
+	MoveAllMode movingMode = arg->i;
+
+	Client *c = NULL;
+	wl_list_for_each(c, &server.clients, link) {
+		if (currentMonitorTag & c->tags) {
+			c->tags = targetTag;
+			continue;
+		}
+
+		switch (movingMode) {
+		case MOVE_ALL_SWAP:
+			if (c->tags & targetTag) {
+				c->tags = currentMonitorTag;
+			}
+			break;
+
+		case MOVE_ALL_NORMAL:
+		case MOVE_ALL_FALLBACK:
+		default:
+			break;
+		}
+	}
+
+	arrange(currentMonitor, false, false);
+	client_switch_view(arg, false);
+
+	client_focus(focusedWindow, 1);
 	return 0;
 }
