@@ -4624,6 +4624,26 @@ int32_t reload_config(const Arg *arg) {
 	return 1;
 }
 
+MoveAllMode parse_move_all_mode(const char *str) {
+	char lowerStr[10];
+	int32_t i = 0;
+	while (str[i] && i < 9) {
+		lowerStr[i] = tolower(str[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "normal") == 0) {
+		return MOVE_ALL_NORMAL;
+	} else if (strcmp(lowerStr, "swap") == 0) {
+		return MOVE_ALL_SWAP;
+	} else if (strcmp(lowerStr, "fallback") == 0) {
+		return MOVE_ALL_FALLBACK;
+	} else {
+		return MOVE_ALL_NORMAL;
+	}
+}
+
 FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 						 char *arg_value2, char *arg_value3, char *arg_value4,
 						 char *arg_value5) {
@@ -4996,7 +5016,10 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = dec_opacity;
 	} else if (strcmp(func_name, "clear_custom_opacity") == 0) {
 		func = clear_custom_opacity;
-
+	} else if (strcmp(func_name, "movewindowstotag") == 0) {
+		(*arg).ui = 1 << (atoi(arg_value) - 1);
+		(*arg).i = parse_move_all_mode(arg_value2);
+		func = movewindowstotag;
 	} else {
 		return NULL;
 	}
