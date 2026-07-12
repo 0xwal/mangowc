@@ -2775,3 +2775,25 @@ int32_t movewindowstotag(const Arg *arg) {
 	client_focus(focusedWindow, 1);
 	return 0;
 }
+
+
+int32_t toggle_noautofocus(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->noautofocus ^= 1;
+
+	if (focusedWindow->noautofocus) {
+		focusedWindow->isoverlay = focusedWindow->noautofocus;
+		focusedWindow->isfloating = focusedWindow->noautofocus;
+
+		client_set_floating(focusedWindow, focusedWindow->isfloating);
+	}
+	
+	return 0;
+}

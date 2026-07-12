@@ -62,6 +62,11 @@ enum { UP, DOWN, LEFT, RIGHT, UNDIR, ALLDIR }; /* smartmovewin */
 	((A)->isfullscreen || (A)->ismaximizescreen ||                             \
 	 (A)->overview_ismaximizescreenbak || (A)->overview_isfullscreenbak)
 
+#define OVERLOAD_FOCUSTOP_1(m) client_focus_top_impl(m, true)
+#define OVERLOAD_FOCUSTOP_2(m, a) client_focus_top_impl(m, a)
+#define GET_FOCUSTOP_MACRO(_1, _2, NAME, ...) NAME
+#define client_focus_top(...) GET_FOCUSTOP_MACRO(__VA_ARGS__, OVERLOAD_FOCUSTOP_2, OVERLOAD_FOCUSTOP_1)(__VA_ARGS__)
+
 struct Client {
 	/* Must keep these three elements in this order */
 	uint32_t type; // must at first in struct
@@ -227,6 +232,7 @@ struct Client {
 	Client *group_next;
 	bool isgroupfocusing;
 	float custom_opacity;
+	int32_t noautofocus;
 };
 
 void client_update_geometry(Client *c);
@@ -324,7 +330,7 @@ Client *direction_select(const Arg *arg);
 /* We probably should change the name of this, it sounds like
  * will focus the topmost client of this mon, when actually will
  * only return that client */
-Client *client_focus_top(Monitor *m);
+Client *client_focus_top_impl(Monitor *m, bool include_all);
 Client *get_next_stack_client(Client *c, bool reverse);
 float *get_border_color(Client *c);
 

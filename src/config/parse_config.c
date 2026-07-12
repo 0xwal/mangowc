@@ -5020,6 +5020,8 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		(*arg).ui = 1 << (atoi(arg_value) - 1);
 		(*arg).i = parse_move_all_mode(arg_value2);
 		func = movewindowstotag;
+	} else if (strcmp(func_name, "toggle_noautofocus") == 0) {
+		func = toggle_noautofocus;
 	} else {
 		return NULL;
 	}
