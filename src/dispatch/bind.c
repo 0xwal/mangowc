@@ -2826,3 +2826,17 @@ int32_t toggle_blur(const Arg *arg) {
 								   iter_xdg_scene_buffers, focusedWindow);
 	return 0;
 }
+
+int32_t send_bottom(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	Client *c = currentMonitor->sel;
+
+	wlr_scene_node_reparent(&c->scene->node, server.layers[LyrBottom]);
+
+	return 0;
+}
