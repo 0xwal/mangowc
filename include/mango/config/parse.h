@@ -586,6 +586,7 @@ typedef struct {
 
 	int32_t hdr_depth;
 	int32_t allow_fullscreen_opacity;
+	int32_t scratchpad_focus_first;
 } Config;
 
 /* Global config instance. */

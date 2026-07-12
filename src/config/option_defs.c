@@ -2353,6 +2353,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		parse_config_file(config, value, true);
 	} else if (strcmp(key, "allow_fullscreen_opacity") == 0) {
 		config->allow_fullscreen_opacity = atoi(value);
+	} else if (strcmp(key, "scratchpad_focus_first") == 0) {
+		config->scratchpad_focus_first = atoi(value);
 	} else {
 		mango_error(false, WLR_ERROR,
 					"Unknown keyword: "
@@ -2723,6 +2725,7 @@ void set_value_default() {
 	config.overlaycolor[3] = 1.0f;
 
 	config.allow_fullscreen_opacity = 0;
+	config.scratchpad_focus_first = 0;
 }
 
 void override_config(void) {
@@ -3002,6 +3005,9 @@ void override_config(void) {
 
 	config.allow_fullscreen_opacity =
 		CLAMP_INT(config.allow_fullscreen_opacity, 0, 1);
+
+	config.scratchpad_focus_first =
+		CLAMP_INT(config.scratchpad_focus_first, 0, 1);
 
 	update_global_var();
 }
