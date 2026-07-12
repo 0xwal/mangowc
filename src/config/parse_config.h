@@ -1404,6 +1404,8 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		(*arg).i = atoi(arg_value);
 	} else if (strcmp(func_name, "toggle_noautofocus") == 0) {
 		func = toggle_noautofocus;
+	} else if (strcmp(func_name, "toggle_shadow") == 0) {
+		func = toggle_shadow;
 	} else {
 		return NULL;
 	}
