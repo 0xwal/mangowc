@@ -242,6 +242,7 @@ struct Client {
 	bool snapshot_temp_visible;
 	/* per-frame: surface clipped away by the draw path */
 	bool is_surface_hidden;
+	float custom_opacity;
 };
 
 #define CLIENT_GROUP_PREV_OFF offsetof(Client, group_prev)

@@ -2192,6 +2192,8 @@ void init_client_properties(Client *c) {
 
 	wl_list_init(&c->link);
 	wl_list_init(&c->flink);
+
+	c->custom_opacity = 0;
 }
 
 static void client_insert_tiling_order(Client *c) {
