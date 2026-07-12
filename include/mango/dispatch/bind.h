@@ -138,4 +138,5 @@ int32_t clear_custom_opacity(const Arg *arg);
 int32_t movewindowstotag(const Arg *arg);
 int32_t toggle_noautofocus(const Arg *arg);
 
+int32_t toggle_shadow(const Arg *arg);
 #endif
