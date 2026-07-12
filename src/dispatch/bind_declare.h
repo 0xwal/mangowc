@@ -97,3 +97,4 @@ void movewindowstotag(const Arg *arg);
 void toggle_noautofocus(const Arg *arg);
 void toggle_shadow(const Arg *arg);
 void toggle_blur(const Arg *arg);
+void send_bottom(const Arg *arg);

@@ -537,8 +537,8 @@ void moveresize(const Arg *arg) {
 		config.drag_tile_small) {
 		grabc->geom.x = cursor->x - 150;
 		grabc->geom.y = cursor->y - 150;
-		grabc->geom.width = 300;
-		grabc->geom.height = 300;
+		grabc->geom.width = 800;
+		grabc->geom.height = 600;
 		resize(grabc, grabc->geom, 1);
 	}
 
@@ -2520,6 +2520,20 @@ void toggle_shadow(const Arg *arg) {
 	focusedWindow->isnoshadow ^= 1;
 	wlr_scene_node_set_enabled(&focusedWindow->shadow->node,
 							   focusedWindow->isnoshadow ? false : true);
+}
+
+void send_bottom(const Arg *arg) {
+	Monitor *currentMonitor = selmon;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return;
+	}
+
+	Client *c = currentMonitor->sel;
+
+	wlr_scene_node_reparent(&c->scene->node, layers[LyrBottom]);
+
+	return;
 }
 
 static void iter_xdg_scene_buffers(struct wlr_scene_buffer *buffer, int32_t sx,
