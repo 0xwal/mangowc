@@ -242,6 +242,39 @@ bool view_shift_tag(const Arg *arg, int dir);
 bool view_shift_tag_have_client(const Arg *arg, int dir);
 
 int32_t focus_direction(const Arg *arg) {
+	if (arg->i == INDEX && arg->ui > 0) {
+		Monitor* selmon = server.selected_monitor;
+		if (!selmon)
+			return 0;
+		uint32_t idx = 1;
+		Client *c = NULL;
+		wl_list_for_each(c, &server.clients, link) {
+			if (c->isunglobal)
+				continue;
+			if (c->mon != selmon)
+				continue;
+			if (!(c->tags & selmon->tagset[selmon->seltags]))
+				continue;
+			if (c->isfloating)
+				continue;
+			if (c->isminimized)
+				continue;
+			if (c->iskilling)
+				continue;
+			// if (c->ismaximizescreen)
+			// 	continue;
+			// if (c->isfullscreen)
+			// 	continue;
+			if (idx == arg->ui) {
+				client_focus(c, 1);
+				if (config.warpcursor)
+					pointer_warp_to_client(c);
+				return 0;
+			}
+			idx++;
+		}
+		return 0;
+	}
 
 	if (!server.selected_monitor)
 		return 0;
