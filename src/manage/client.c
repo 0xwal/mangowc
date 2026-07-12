@@ -1223,7 +1223,7 @@ Client *direction_select(const Arg *arg) {
 /* We probably should change the name of this, it sounds like
  * will focus the topmost client of this mon, when actually will
  * only return that client */
-Client *client_focus_top(Monitor *m) {
+Client *client_focus_top_impl(Monitor *m, bool include_all) {
 	Client *c = NULL;
 
 	if (!m) {
@@ -1233,8 +1233,11 @@ Client *client_focus_top(Monitor *m) {
 	wl_list_for_each(c, &server.focus_stack, flink) {
 		if (c->iskilling || c->isunglobal)
 			continue;
-		if (VISIBLEON(c, m) && client_surface(c)->mapped)
-			return c;
+		if (!VISIBLEON(c, m) && client_surface(c)->mapped)
+			continue;
+		if (!include_all && c->noautofocus)
+			continue;
+		return c;
 	}
 	return NULL;
 }
@@ -1523,6 +1526,7 @@ void apply_rule_properties(Client *c, const ConfigWinRule *r) {
 
 	APPLY_INT_PROP(c, r, animation_type_open);
 	APPLY_INT_PROP(c, r, animation_type_close);
+	APPLY_INT_PROP(c, r, noautofocus);
 }
 void set_float_malposition(Client *tc) {
 	Client *c = NULL;
@@ -2197,6 +2201,7 @@ void init_client_properties(Client *c) {
 	wl_list_init(&c->flink);
 
 	c->custom_opacity = 0;
+	c->noautofocus = 0;
 }
 
 static void client_insert_tiling_order(Client *c) {
