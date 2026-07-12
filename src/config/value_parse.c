@@ -265,6 +265,25 @@ WindowType parse_direction_mode(const char *str) {
 	}
 }
 
+MoveAllMode parse_move_all_mode(const char *str) {
+	char lowerStr[10];
+	int32_t i = 0;
+	while (str[i] && i < 9) {
+		lowerStr[i] = tolower(str[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "normal") == 0) {
+		return MOVE_ALL_NORMAL;
+	} else if (strcmp(lowerStr, "swap") == 0) {
+		return MOVE_ALL_SWAP;
+	} else if (strcmp(lowerStr, "fallback") == 0) {
+		return MOVE_ALL_FALLBACK;
+	} else {
+		return MOVE_ALL_NORMAL;
+	}
+}
 
 int32_t parse_monitor_arg(const char *str) {
 	int32_t dir = parse_direction(str);

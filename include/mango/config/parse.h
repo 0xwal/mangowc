@@ -53,6 +53,7 @@ enum tearing_mode {
 };
 
 typedef enum { WIN_ANY, WIN_TILED, WIN_FLOATING } WindowType;
+typedef enum { MOVE_ALL_NORMAL, MOVE_ALL_SWAP, MOVE_ALL_FALLBACK } MoveAllMode;
 
 enum seat_config_shortcuts_inhibit {
 	SHORTCUTS_INHIBIT_DISABLE,
@@ -632,9 +633,6 @@ void parse_bind_flags(const char *str, KeyBinding *kb);
 
 int32_t parse_circle_direction(const char *str);
 
-int32_t parse_direction(const char *str);
-WindowType parse_direction_mode(const char *str);
-
 int32_t parse_monitor_arg(const char *str);
 
 int32_t parse_force(const char *str);
@@ -741,4 +739,8 @@ bool check_simple_binding_conflicts(void *arr, size_t count, size_t elem_size,
 									bool (*same_key)(const void *,
 													 const void *),
 									BindingMetaFunc get_meta, const char *kind);
+
+int32_t parse_direction(const char *str);
+WindowType parse_direction_mode(const char *str);
+MoveAllMode parse_move_all_mode(const char *str);
 #endif

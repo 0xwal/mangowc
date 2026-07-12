@@ -867,6 +867,10 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = dec_opacity;
 	} else if (strcmp(func_name, "clear_custom_opacity") == 0) {
 		func = clear_custom_opacity;
+	} else if (strcmp(func_name, "movewindowstotag") == 0) {
+		(*arg).ui = 1 << (atoi(arg_value) - 1);
+		(*arg).i = parse_move_all_mode(arg_value2);
+		func = movewindowstotag;
 	} else {
 		return NULL;
 	}

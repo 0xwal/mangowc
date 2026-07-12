@@ -139,4 +139,7 @@ int32_t toggle_opacity(const Arg *arg);
 int32_t inc_opacity(const Arg *arg);
 int32_t dec_opacity(const Arg *arg);
 int32_t clear_custom_opacity(const Arg *arg);
+
+int32_t movewindowstotag(const Arg *arg);
+
 #endif
