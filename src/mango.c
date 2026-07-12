@@ -439,6 +439,7 @@ struct Client {
 	int32_t isunglobal;
 	float focused_opacity;
 	float unfocused_opacity;
+	float custom_opacity;
 	char oldmonname[128];
 	int32_t noblur;
 	float blur_opacity;
@@ -4666,6 +4667,7 @@ void init_client_properties(Client *c) {
 	c->fake_no_border = false;
 	c->focused_opacity = config.focused_opacity;
 	c->unfocused_opacity = config.unfocused_opacity;
+	c->custom_opacity = 0.0f;
 	c->nofocus = 0;
 	c->nofadein = 0;
 	c->nofadeout = 0;

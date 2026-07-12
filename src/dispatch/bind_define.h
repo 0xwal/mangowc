@@ -2271,3 +2271,64 @@ void load_config_file(const Arg *arg) {
 	reload_config(arg);
 	return;
 }
+
+void toggle_opacity(const Arg *arg) {
+	Client *c = selmon->sel;
+	if (!c)
+		return;
+
+	if (c->custom_opacity > 0.0f) {
+		c->custom_opacity = 0.0f;
+		client_set_opacity(c, c->focused_opacity);
+	} else {
+		c->custom_opacity = 1.0f;
+		client_set_opacity(c, 1.0f);
+	}
+	return;
+}
+
+void inc_opacity(const Arg *arg) {
+	Client *c = selmon->sel;
+	if (!c)
+		return;
+
+	float value = CLAMP_FLOAT(arg->f, 0.01f, 1.0f);
+
+	if (c->custom_opacity == 0.0f) {
+		c->custom_opacity = c->focused_opacity;
+	}
+
+	float target = MIN(c->custom_opacity + value, 1.0f);
+	c->custom_opacity = target;
+	client_set_opacity(c, target);
+	return;
+}
+
+void dec_opacity(const Arg *arg) {
+	Client *c = selmon->sel;
+
+	if (!c)
+		return;
+
+	float value = CLAMP_FLOAT(arg->f, 0.01f, 1.0f);
+
+	if (c->custom_opacity == 0.0f) {
+		c->custom_opacity = c->focused_opacity;
+	}
+
+	float target = MAX(c->custom_opacity - value, 0.01f);
+	c->custom_opacity = target;
+	client_set_opacity(c, target);
+	return;
+}
+
+void clear_custom_opacity(const Arg *arg) {
+	Client *c = selmon->sel;
+	if (!c)
+		return;
+
+	c->custom_opacity = 0.0f;
+	client_set_opacity(c, c->focused_opacity);
+	return;
+}
+

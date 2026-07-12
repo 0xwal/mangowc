@@ -1338,6 +1338,16 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = dwindle_split_vertical;
 	} else if (strcmp(func_name, "dwindle_toggle_current_split") == 0) {
 		func = dwindle_toggle_current_split;
+	} else if (strcmp(func_name, "toggle_opacity") == 0) {
+		func = toggle_opacity;
+	} else if (strcmp(func_name, "inc_opacity") == 0) {
+		(*arg).f = atof(arg_value);
+		func = inc_opacity;
+	} else if (strcmp(func_name, "dec_opacity") == 0) {
+		(*arg).f = atof(arg_value);
+		func = dec_opacity;
+	} else if (strcmp(func_name, "clear_custom_opacity") == 0) {
+		func = clear_custom_opacity;
 	} else {
 		return NULL;
 	}
