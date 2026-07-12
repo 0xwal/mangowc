@@ -22,6 +22,8 @@ enum {
 	GroupBar
 }; /* client types */
 
+typedef enum { MOVE_ALL_NORMAL, MOVE_ALL_SWAP, MOVE_ALL_FALLBACK } MoveAllMode;
+
 typedef enum { WIN_ANY, WIN_TILED, WIN_FLOATING } WindowType;
 
 #ifdef XWAYLAND
