@@ -548,6 +548,7 @@ typedef struct {
 	DecorateDrawData jumplabeldata;
 	DecorateDrawData groupbardata;
 
+	int32_t scratchpad_focus_first;
 	int32_t hdr_depth;
 } Config;
 
