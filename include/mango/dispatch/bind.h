@@ -140,4 +140,6 @@ int32_t toggle_noautofocus(const Arg *arg);
 
 int32_t toggle_shadow(const Arg *arg);
 int32_t toggle_blur(const Arg *arg);
+
+int32_t send_bottom(const Arg *arg);
 #endif

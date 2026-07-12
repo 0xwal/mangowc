@@ -5210,6 +5210,8 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = toggle_shadow;
 	} else if (strcmp(func_name, "toggle_blur") == 0) {
 		func = toggle_blur;
+	} else if (strcmp(func_name, "send_bottom") == 0) {
+		func = send_bottom;
 	} else {
 		return NULL;
 	}
