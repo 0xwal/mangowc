@@ -22,6 +22,8 @@ enum {
 	GroupBar
 }; /* client types */
 
+typedef enum { WIN_ANY, WIN_TILED, WIN_FLOATING } WindowType;
+
 #ifdef XWAYLAND
 enum {
 	NetWMWindowTypeDialog,
@@ -320,7 +322,7 @@ client_center_geometry(Client *c, Monitor *tm, struct wlr_box geom,
 bool is_window_rule_matches(const ConfigWinRule *r, const char *appid,
 							const char *title);
 Client *center_tiled_select(Monitor *m);
-Client *find_client_by_direction(Client *tc, const Arg *arg, bool findfloating);
+Client *find_client_by_direction(Client *tc, const Arg *arg, WindowType mode);
 Client *direction_select(const Arg *arg);
 /* We probably should change the name of this, it sounds like
  * will focus the topmost client of this mon, when actually will
