@@ -52,6 +52,8 @@ enum tearing_mode {
 	TEARING_FULLSCREEN_ONLY,
 };
 
+typedef enum { WIN_ANY, WIN_TILED, WIN_FLOATING } WindowType;
+
 enum seat_config_shortcuts_inhibit {
 	SHORTCUTS_INHIBIT_DISABLE,
 	SHORTCUTS_INHIBIT_ENABLE,
@@ -631,6 +633,7 @@ void parse_bind_flags(const char *str, KeyBinding *kb);
 int32_t parse_circle_direction(const char *str);
 
 int32_t parse_direction(const char *str);
+WindowType parse_direction_mode(const char *str);
 
 int32_t parse_monitor_arg(const char *str);
 

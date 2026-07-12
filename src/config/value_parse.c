@@ -245,6 +245,27 @@ int32_t parse_direction(const char *str) {
 	}
 }
 
+WindowType parse_direction_mode(const char *str) {
+	char lowerStr[10];
+	int32_t i = 0;
+	while (str[i] && i < 9) {
+		lowerStr[i] = tolower(str[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "any") == 0) {
+		return WIN_ANY;
+	} else if (strcmp(lowerStr, "tiled") == 0) {
+		return WIN_TILED;
+	} else if (strcmp(lowerStr, "floating") == 0) {
+		return WIN_FLOATING;
+	} else {
+		return WIN_ANY;
+	}
+}
+
+
 int32_t parse_monitor_arg(const char *str) {
 	int32_t dir = parse_direction(str);
 
