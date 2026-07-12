@@ -226,7 +226,7 @@ enum {
 	NetLast
 }; /* EWMH atoms */
 #endif
-enum { UP, DOWN, LEFT, RIGHT, UNDIR }; /* smartmovewin */
+enum { UP, DOWN, LEFT, RIGHT, UNDIR, INDEX }; /* smartmovewin */
 
 typedef enum { WIN_ANY, WIN_TILED, WIN_FLOATING } WindowType;
 

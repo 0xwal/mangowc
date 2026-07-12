@@ -1237,8 +1237,13 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = groupfocus;
 		(*arg).i = parse_circle_direction(arg_value);
 	} else if (strcmp(func_name, "focusdir") == 0) {
-		(*arg).i = parse_direction(arg_value);
-		(*arg).i2 = parse_direction_mode(arg_value2);
+		if (arg_value && arg_value[0] && isdigit(arg_value[0])) {
+			(*arg).ui = (uint32_t)atoi(arg_value);
+			(*arg).i = INDEX;
+		} else {
+			(*arg).i = parse_direction(arg_value);
+			(*arg).i2 = parse_direction_mode(arg_value2);
+		}
 		func = focusdir;
 	} else if (strcmp(func_name, "focus_window_or_workspace") == 0) {
 		func = focus_window_or_workspace;
