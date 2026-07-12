@@ -2571,7 +2571,8 @@ int32_t scroller_stack(const Arg *arg) {
 		!is_scroller_layout(server.selected_monitor))
 		return 0;
 
-	Client *target_client = find_client_by_direction(c, arg, false);
+	Client *target_client = find_client_by_direction(c, arg, WIN_TILED);
+
 
 	scroller_apply_stack(c, target_client, arg->i);
 	return 0;
