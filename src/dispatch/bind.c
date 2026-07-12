@@ -2811,3 +2811,18 @@ int32_t toggle_shadow(const Arg *arg) {
 							   focusedWindow->isnoshadow ? false : true);
 	return 0;
 }
+
+int32_t toggle_blur(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->noblur ^= 1;
+	wlr_scene_node_for_each_buffer(&focusedWindow->scene_surface->node,
+								   iter_xdg_scene_buffers, focusedWindow);
+	return 0;
+}
