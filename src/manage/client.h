@@ -839,8 +839,7 @@ Client *center_tiled_select(Monitor *m) {
 	return target_c;
 }
 
-Client *find_client_by_direction(Client *tc, const Arg *arg,
-								 WindowType mode) {
+Client *find_client_by_direction(Client *tc, const Arg *arg, WindowType mode) {
 	Client *c = NULL;
 	Client *tempFocusClients = NULL;
 	Client *tempSameMonitorFocusClients = NULL;
@@ -2849,6 +2848,10 @@ void setfullscreen(Client *c, int32_t fullscreen,
 
 	c->isfullscreen = fullscreen;
 
+	if (!c->isfakefullscreen) {
+		client_set_fullscreen(c, fullscreen);
+	}
+
 	client_set_fullscreen(c, fullscreen);
 	client_pending_fullscreen_state(c, fullscreen);
 
@@ -2861,7 +2864,7 @@ void setfullscreen(Client *c, int32_t fullscreen,
 		client_pending_maximized_state(c, 0);
 
 		exit_scroller_stack(c);
-		c->isfakefullscreen = 0;
+		// c->isfakefullscreen = 0;
 
 		c->bw = 0;
 		wlr_scene_node_raise_to_top(&c->scene->node); // 将视图提升到顶层
@@ -2886,8 +2889,8 @@ void setfakefullscreen(Client *c, int32_t fakefullscreen) {
 	if (!c->mon)
 		return;
 
-	if (c->isfullscreen)
-		setfullscreen(c, 0, true);
+	// if (c->isfullscreen)
+	// 	setfullscreen(c, 0, true);
 
 	client_set_fullscreen(c, fakefullscreen);
 }
