@@ -91,3 +91,4 @@ void dec_opacity(const Arg *arg);
 void clear_custom_opacity(const Arg *arg);
 void setmark(const Arg *arg);
 void focusmark(const Arg *arg);
+void movewindowstotag(const Arg *arg);
