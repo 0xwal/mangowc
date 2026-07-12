@@ -3419,6 +3419,23 @@ bool switch_scratchpad_client_state(Client *c) {
 
 		c->float_geom = client_center_geometry(c, c->mon, c->float_geom, 0, 0);
 
+		/*
+NOTE: this was my edition and ensure
+upstream has the same functionality
+-		set_minimized(c);
++		if (config.scratchpad_focus_first) {
++			Client *focused = focustop(c->mon);
++			if (focused == c) {
++				set_minimized(c);
++			} else {
++				focusclient(c, 1);
++			}
++		} else {
++			set_minimized(c);
++		}
++
+		*/
+
 		// Only a visible scratchpad needs focus and returns true.
 		if (SCRATCHPAD_SHOWN(c)) {
 			c->tags = get_tags_first_tag(
