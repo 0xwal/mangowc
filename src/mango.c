@@ -5916,8 +5916,8 @@ void setfakefullscreen(Client *c, int32_t fakefullscreen) {
 	if (!c->mon)
 		return;
 
-	if (c->isfullscreen)
-		setfullscreen(c, 0, true);
+	// if (c->isfullscreen)
+	// 	setfullscreen(c, 0, true);
 
 	client_set_fullscreen(c, fakefullscreen);
 }
@@ -5935,7 +5935,9 @@ void setfullscreen(Client *c, int32_t fullscreen,
 
 	c->isfullscreen = fullscreen;
 
-	client_set_fullscreen(c, fullscreen);
+	if (!c->isfakefullscreen) {
+		client_set_fullscreen(c, fullscreen);
+	}
 	client_pending_fullscreen_state(c, fullscreen);
 
 	if (fullscreen) {
@@ -5947,7 +5949,7 @@ void setfullscreen(Client *c, int32_t fullscreen,
 		client_pending_maximized_state(c, 0);
 
 		exit_scroller_stack(c);
-		c->isfakefullscreen = 0;
+		// c->isfakefullscreen = 0;
 
 		c->bw = 0;
 		wlr_scene_node_raise_to_top(&c->scene->node); // 将视图提升到顶层
