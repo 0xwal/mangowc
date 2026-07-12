@@ -532,6 +532,7 @@ typedef struct {
 	int32_t allow_tearing;
 	int32_t allow_shortcuts_inhibit;
 	int32_t allow_lock_transparent;
+	int32_t allow_fullscreen_opacity;
 
 	struct xkb_rule_names xkb_rules;
 	char xkb_rules_rules[128];

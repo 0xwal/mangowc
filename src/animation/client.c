@@ -1594,8 +1594,8 @@ void client_set_unfocused_opacity_animation(Client *c) {
 		return;
 	}
 
-	float opacity =
-		c == server.selected_monitor->sel ? c->focused_opacity : c->unfocused_opacity;
+	float opacity = c == server.selected_monitor->sel ? c->focused_opacity
+													  : c->unfocused_opacity;
 
 	if (c->custom_opacity > 0.0f) {
 		opacity = c->custom_opacity;
@@ -1625,8 +1625,8 @@ void client_set_focused_opacity_animation(Client *c) {
 		return;
 	}
 
-	float opacity =
-		c == server.selected_monitor->sel ? c->focused_opacity : c->unfocused_opacity;
+	float opacity = c == server.selected_monitor->sel ? c->focused_opacity
+													  : c->unfocused_opacity;
 
 	if (c->custom_opacity > 0.0f) {
 		opacity = c->custom_opacity;
@@ -1653,8 +1653,8 @@ bool client_apply_focus_opacity(Client *c) {
 	}
 
 	float *border_color = get_border_color(c);
-	float opacity =
-		c == server.selected_monitor->sel ? c->focused_opacity : c->unfocused_opacity;
+	float opacity = c == server.selected_monitor->sel ? c->focused_opacity
+													  : c->unfocused_opacity;
 
 	if (c->custom_opacity > 0.0f) {
 		opacity = c->custom_opacity;
@@ -1662,7 +1662,7 @@ bool client_apply_focus_opacity(Client *c) {
 
 	if (c->isfullscreen) {
 		c->opacity_animation.running = false;
-		client_set_opacity(c, 1);
+		client_set_opacity(c, config.allow_fullscreen_opacity ? opacity : 1.0f);
 	} else if (c->animation.running && c->animation.action == OPEN) {
 		c->opacity_animation.running = false;
 		struct timespec now;
@@ -1679,7 +1679,7 @@ bool client_apply_focus_opacity(Client *c) {
 		float percent = config.animation_fade_in && !c->nofadein
 							? opacity_eased_progress
 							: 1.0;
-		
+
 		float target_opacity = percent * (1.0 - config.fadein_begin_opacity) +
 							   config.fadein_begin_opacity;
 		if (target_opacity > opacity)

@@ -2403,6 +2403,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		parse_config_file(config, value, false);
 	} else if (strncmp(key, "source", 6) == 0) {
 		parse_config_file(config, value, true);
+	} else if (strcmp(key, "allow_fullscreen_opacity") == 0) {
+		config->allow_fullscreen_opacity = atoi(value);
 	} else {
 		mango_error(false, WLR_ERROR,
 					"Unknown keyword: "
@@ -3836,6 +3838,9 @@ void override_config(void) {
 	config.jumplabeldata.padding_y =
 		CLAMP_INT(config.jumplabeldata.padding_y, 0, 100);
 
+	config.allow_fullscreen_opacity =
+		CLAMP_INT(config.allow_fullscreen_opacity, 0, 1);
+
 	update_global_var();
 }
 
@@ -4126,6 +4131,8 @@ void set_value_default() {
 	config.overlaycolor[1] = 0xa5 / 255.0f;
 	config.overlaycolor[2] = 0x7c / 255.0f;
 	config.overlaycolor[3] = 1.0f;
+
+	config.allow_fullscreen_opacity = 0;
 }
 
 void set_default_key_bindings(Config *config) {
