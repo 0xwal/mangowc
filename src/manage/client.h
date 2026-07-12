@@ -988,13 +988,16 @@ Client *direction_select(const Arg *arg) {
 /* We probably should change the name of this, it sounds like
  * will focus the topmost client of this mon, when actually will
  * only return that client */
-Client *focustop(Monitor *m) {
+Client *focustop_impl(Monitor *m, bool include_all) {
 	Client *c = NULL;
 	wl_list_for_each(c, &fstack, flink) {
 		if (c->iskilling || c->isunglobal)
 			continue;
-		if (VISIBLEON(c, m))
-			return c;
+		if (!VISIBLEON(c, m))
+			continue;
+		if (!include_all && c->noautofocus)
+			continue;
+		return c;
 	}
 	return NULL;
 }
@@ -1180,6 +1183,8 @@ static void apply_rule_properties(Client *c, const ConfigWinRule *r) {
 
 	APPLY_STRING_PROP(c, r, animation_type_open);
 	APPLY_STRING_PROP(c, r, animation_type_close);
+	
+	APPLY_INT_PROP(c, r, noautofocus);
 }
 
 void set_float_malposition(Client *tc) {
@@ -1790,6 +1795,7 @@ void init_client_properties(Client *c) {
 	wl_list_init(&c->flink);
 	c->custom_opacity = 0;
 	c->mark = -1;
+	c->noautofocus = 0;
 }
 
 void // old fix to 0.5
@@ -3144,7 +3150,7 @@ bool switch_scratchpad_client_state(Client *c) {
 	} else if (c->is_in_scratchpad && c->is_scratchpad_show &&
 			   (c->mon->tagset[c->mon->seltags] & c->tags) != 0) {
 		if (config.scratchpad_focus_first) {
-			Client *focused = focustop(c->mon);
+			Client *focused = focustop(c->mon, true);
 			if (focused == c) {
 				set_minimized(c);
 			} else {

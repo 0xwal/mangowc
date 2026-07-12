@@ -179,6 +179,14 @@ uint32_t tagmask = ((1u << 9) - 1); // 默认 9 个 tag
 		IPC_WATCH_ALL_MONITORS | IPC_WATCH_ALL_TAGS | IPC_WATCH_ALL_CLIENTS |  \
 		IPC_WATCH_LAST_OPEN_SURFACE | IPC_WATCH_FOCUSING_CLIENT
 
+// Macro overload: focustop(m) defaults include_all=true, focustop(m, bool) passes through
+#define OVERLOAD_FOCUSTOP_1(m) focustop_impl(m, true)
+#define OVERLOAD_FOCUSTOP_2(m, a) focustop_impl(m, a)
+#define GET_FOCUSTOP_MACRO(_1, _2, NAME, ...) NAME
+#define focustop(...) GET_FOCUSTOP_MACRO(__VA_ARGS__, OVERLOAD_FOCUSTOP_2, OVERLOAD_FOCUSTOP_1)(__VA_ARGS__)
+
+
+
 /* enums */
 enum { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT };
 
@@ -413,6 +421,7 @@ struct Client {
 	uint32_t bw;
 	uint32_t tags, oldtags, mini_restore_tag;
 	bool dirty;
+	uint32_t noautofocus;
 	uint32_t configure_serial;
 	struct wlr_foreign_toplevel_handle_v1 *foreign_toplevel;
 	int32_t isfloating, isurgent, isfullscreen, isfakefullscreen,
@@ -783,7 +792,7 @@ static void focuslayer(LayerSurface *l);
 static void focusclient(Client *c, int32_t lift);
 
 static void setborder_color(Client *c);
-static Client *focustop(Monitor *m);
+static Client *focustop_impl(Monitor *m, bool include_all);
 static void fullscreennotify(struct wl_listener *listener, void *data);
 static void gpureset(struct wl_listener *listener, void *data);
 
@@ -1090,7 +1099,6 @@ Client *get_client_by_id_or_title(const char *arg_id, const char *arg_title);
 Client *center_tiled_select(Monitor *m);
 Client *find_client_by_direction(Client *tc, const Arg *arg, WindowType mode);
 Client *direction_select(const Arg *arg);
-Client *focustop(Monitor *m);
 Client *get_next_stack_client(Client *c, bool reverse);
 float *get_border_color(Client *c);
 Client *get_focused_stack_client(Client *sc, Client *custom_focus_client);

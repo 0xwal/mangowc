@@ -351,7 +351,7 @@ void focusmon(const Arg *arg) {
 	if (config.warpcursor) {
 		warp_cursor_to_selmon(selmon);
 	}
-	c = arg->tc ? arg->tc : focustop(selmon);
+	c = arg->tc ? arg->tc : focustop(selmon, false);
 	if (!c) {
 		selmon->sel = NULL;
 		wlr_seat_pointer_notify_clear_focus(seat);
@@ -364,7 +364,7 @@ void focusmon(const Arg *arg) {
 }
 
 void focusstack(const Arg *arg) {
-	Client *sel = arg->tc ? arg->tc : focustop(selmon);
+	Client *sel = arg->tc ? arg->tc : focustop(selmon, false);
 	Client *tc = NULL;
 
 	if (!sel)
@@ -2484,5 +2484,26 @@ void movewindowstotag(const Arg *arg) {
 	view(arg, false);
 
 	focusclient(focusedWindow, 1);
+	return;
+}
+
+void toggle_noautofocus(const Arg *arg) {
+	Monitor *currentMonitor = selmon;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->noautofocus ^= 1;
+
+	if (focusedWindow->noautofocus) {
+		focusedWindow->isoverlay = focusedWindow->noautofocus;
+		focusedWindow->isfloating = focusedWindow->noautofocus;
+
+		setfloating(focusedWindow, focusedWindow->isfloating);
+	}
+	
 	return;
 }

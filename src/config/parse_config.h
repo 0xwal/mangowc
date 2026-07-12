@@ -108,6 +108,7 @@ typedef struct {
 	int32_t force_tearing;
 	int32_t noswallow;
 	int32_t noblur;
+	int32_t noautofocus;
 	float focused_opacity;
 	float unfocused_opacity;
 	float scroller_proportion_single;
@@ -1550,6 +1551,8 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 	} else if (strcmp(func_name, "focusmark") == 0) {
 		func = focusmark;
 		(*arg).i = atoi(arg_value);
+	} else if (strcmp(func_name, "toggle_noautofocus") == 0) {
+		func = toggle_noautofocus;
 	} else {
 		return NULL;
 	}
@@ -2736,6 +2739,7 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->force_tearing = -1;
 		rule->noswallow = -1;
 		rule->noblur = -1;
+		rule->noautofocus = -1;
 		rule->nofocus = -1;
 		rule->nofadein = -1;
 		rule->nofadeout = -1;
@@ -2869,6 +2873,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 					rule->isfullscreen = atoi(val);
 				} else if (strcmp(key, "isfakefullscreen") == 0) {
 					rule->isfakefullscreen = atoi(val);
+				} else if (strcmp(key, "noautofocus") == 0) {
+					rule->noautofocus = atoi(val);
 				} else if (strcmp(key, "globalkeybinding") == 0) {
 					char mod_str[256], keysym_str[256];
 					sscanf(val, "%255[^-]-%255[a-zA-Z]", mod_str, keysym_str);
