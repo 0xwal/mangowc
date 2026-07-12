@@ -840,7 +840,7 @@ Client *center_tiled_select(Monitor *m) {
 }
 
 Client *find_client_by_direction(Client *tc, const Arg *arg,
-								 bool findfloating) {
+								 WindowType mode) {
 	Client *c = NULL;
 	Client *tempFocusClients = NULL;
 	Client *tempSameMonitorFocusClients = NULL;
@@ -861,7 +861,9 @@ Client *find_client_by_direction(Client *tc, const Arg *arg,
 		wl_list_for_each(c, &clients, link) {
 			if (!c || !c->mon || c == tc)
 				continue;
-			if (!findfloating && c->isfloating)
+			if (mode == WIN_TILED && c->isfloating)
+				continue;
+			if (mode == WIN_FLOATING && !c->isfloating)
 				continue;
 			if (!VISIBLEON(c, c->mon))
 				continue;
@@ -980,7 +982,8 @@ Client *direction_select(const Arg *arg) {
 		return NULL;
 	}
 
-	return find_client_by_direction(tc, arg, true);
+	WindowType mode = arg->i2;
+	return find_client_by_direction(tc, arg, mode);
 }
 
 /* We probably should change the name of this, it sounds like

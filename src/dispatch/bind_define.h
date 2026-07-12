@@ -2206,7 +2206,7 @@ void scroller_stack(const Arg *arg) {
 	if (!c || !c->mon || c->isfloating || !is_scroller_layout(selmon))
 		return;
 
-	Client *target_client = find_client_by_direction(c, arg, false);
+	Client *target_client = find_client_by_direction(c, arg, WIN_TILED);
 
 	scroller_apply_stack(c, target_client, arg->i);
 }
