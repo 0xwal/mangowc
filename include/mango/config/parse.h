@@ -585,6 +585,7 @@ typedef struct {
 	DecorateDrawData title_message_bardata;
 
 	int32_t hdr_depth;
+	int32_t allow_fullscreen_opacity;
 } Config;
 
 /* Global config instance. */
