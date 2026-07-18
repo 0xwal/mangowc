@@ -1170,8 +1170,14 @@ void warp_cursor_to_selmon(Monitor *m) {
 
 	wlr_cursor_warp_closest(cursor, NULL, m->w.x + m->w.width / 2.0,
 							m->w.y + m->w.height / 2.0);
-	wlr_cursor_set_xcursor(cursor, cursor_mgr, "default");
-	handlecursoractivity();
+
+	if (cursor_hidden) {
+		wl_event_source_timer_update(hide_cursor_source,
+									 config.cursor_hide_timeout * 1000);
+	} else {
+		wlr_cursor_set_xcursor(cursor, cursor_mgr, "default");
+		handlecursoractivity();
+	}
 }
 
 void virtualpointer(struct wl_listener *listener, void *data) {
