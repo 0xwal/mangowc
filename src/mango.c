@@ -1179,7 +1179,6 @@ static struct wl_event_source *sync_keymap;
 #include "animation/tag.h"
 #include "ext-protocol/all.h"
 #include "fetch/fetch.h"
-#include "input/touch.h"
 #include "dispatch/bind_define.h"
 #include "ipc/ipc.h"
 #include "layout/arrange.h"

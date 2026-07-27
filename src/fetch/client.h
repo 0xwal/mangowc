@@ -1,3 +1,5 @@
+#pragma once
+
 bool check_hit_no_border(Client *c) {
 	bool hit_no_border = false;
 
