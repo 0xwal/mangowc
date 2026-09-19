@@ -242,6 +242,39 @@ bool view_shift_tag(const Arg *arg, int dir);
 bool view_shift_tag_have_client(const Arg *arg, int dir);
 
 int32_t focus_direction(const Arg *arg) {
+	if (arg->i == INDEX && arg->ui > 0) {
+		Monitor* selmon = server.selected_monitor;
+		if (!selmon)
+			return 0;
+		uint32_t idx = 1;
+		Client *c = NULL;
+		wl_list_for_each(c, &server.clients, link) {
+			if (c->isunglobal)
+				continue;
+			if (c->mon != selmon)
+				continue;
+			if (!(c->tags & selmon->tagset[selmon->seltags]))
+				continue;
+			if (c->isfloating)
+				continue;
+			if (c->isminimized)
+				continue;
+			if (c->iskilling)
+				continue;
+			// if (c->ismaximizescreen)
+			// 	continue;
+			// if (c->isfullscreen)
+			// 	continue;
+			if (idx == arg->ui) {
+				client_focus(c, 1);
+				if (config.warpcursor)
+					pointer_warp_to_client(c);
+				return 0;
+			}
+			idx++;
+		}
+		return 0;
+	}
 
 	if (!server.selected_monitor)
 		return 0;
@@ -2534,7 +2567,7 @@ int32_t scroller_stack(const Arg *arg) {
 		!is_scroller_layout(server.selected_monitor))
 		return 0;
 
-	Client *target_client = find_client_by_direction(c, arg, false);
+	Client *target_client = find_client_by_direction(c, arg, WIN_TILED);
 
 	scroller_apply_stack(c, target_client, arg->i);
 	return 0;
@@ -2671,4 +2704,172 @@ int32_t load_config_file(const Arg *arg) {
 	snprintf(server.cli_config_path, sizeof(server.cli_config_path), "%s",
 			 arg->v);
 	return reload_config(arg);
+}
+
+int32_t toggle_opacity(const Arg *arg) {
+	Client *c = server.selected_monitor->sel;
+	if (!c)
+		return 0;
+
+	if (c->custom_opacity > 0.0f) {
+		c->custom_opacity = 0.0f;
+		client_set_opacity(c, c->focused_opacity);
+	} else {
+		c->custom_opacity = 1.0f;
+		client_set_opacity(c, 1.0f);
+	}
+	return 0;
+}
+
+int32_t inc_opacity(const Arg *arg) {
+	Client *c = server.selected_monitor->sel;
+	if (!c)
+		return 0;
+
+	float value = CLAMP_FLOAT(arg->f, 0.01f, 1.0f);
+
+	if (c->custom_opacity == 0.0f) {
+		c->custom_opacity = c->focused_opacity;
+	}
+
+	float target = MIN(c->custom_opacity + value, 1.0f);
+	c->custom_opacity = target;
+	client_set_opacity(c, target);
+	return 0;
+}
+
+int32_t dec_opacity(const Arg *arg) {
+	Client *c = server.selected_monitor->sel;
+
+	if (!c)
+		return 0;
+
+	float value = CLAMP_FLOAT(arg->f, 0.01f, 1.0f);
+
+	if (c->custom_opacity == 0.0f) {
+		c->custom_opacity = c->focused_opacity;
+	}
+
+	float target = MAX(c->custom_opacity - value, 0.01f);
+	c->custom_opacity = target;
+	client_set_opacity(c, target);
+	return 0;
+}
+
+int32_t clear_custom_opacity(const Arg *arg) {
+	Client *c = server.selected_monitor->sel;
+	if (!c)
+		return 0;
+
+	c->custom_opacity = 0.0f;
+	client_set_opacity(c, c->focused_opacity);
+	return 0;
+}
+
+int32_t movewindowstotag(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	uint32_t currentMonitorTag =
+		currentMonitor->tagset[currentMonitor->seltags];
+	Client *focusedWindow = currentMonitor->sel;
+
+	uint32_t targetTag = arg->ui & TAGMASK;
+
+	MoveAllMode movingMode = arg->i;
+
+	Client *c = NULL;
+	wl_list_for_each(c, &server.clients, link) {
+		if (currentMonitorTag & c->tags) {
+			c->tags = targetTag;
+			continue;
+		}
+
+		switch (movingMode) {
+		case MOVE_ALL_SWAP:
+			if (c->tags & targetTag) {
+				c->tags = currentMonitorTag;
+			}
+			break;
+
+		case MOVE_ALL_NORMAL:
+		case MOVE_ALL_FALLBACK:
+		default:
+			break;
+		}
+	}
+
+	arrange(currentMonitor, false, false);
+	client_switch_view(arg, false);
+
+	client_focus(focusedWindow, 1);
+	return 0;
+}
+
+int32_t toggle_noautofocus(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->noautofocus ^= 1;
+
+	if (focusedWindow->noautofocus) {
+		focusedWindow->isoverlay = focusedWindow->noautofocus;
+		focusedWindow->isfloating = focusedWindow->noautofocus;
+
+		client_set_floating(focusedWindow, focusedWindow->isfloating);
+	}
+
+	return 0;
+}
+
+int32_t toggle_shadow(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->isnoshadow ^= 1;
+	wlr_scene_node_set_enabled(&focusedWindow->shadow->node,
+							   focusedWindow->isnoshadow ? false : true);
+	return 0;
+}
+
+int32_t toggle_blur(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	Client *focusedWindow = currentMonitor->sel;
+
+	focusedWindow->noblur ^= 1;
+	wlr_scene_node_for_each_buffer(&focusedWindow->scene_surface->node,
+								   iter_xdg_scene_buffers, focusedWindow);
+	return 0;
+}
+
+int32_t send_bottom(const Arg *arg) {
+	Monitor *currentMonitor = server.selected_monitor;
+
+	if (!currentMonitor || !currentMonitor->sel) {
+		return 0;
+	}
+
+	Client *c = currentMonitor->sel;
+
+	wlr_scene_node_reparent(&c->scene->node, server.layers[LyrBottom]);
+
+	return 0;
 }

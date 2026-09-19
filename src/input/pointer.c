@@ -16,6 +16,7 @@
 #include "mango/manage/layer.h"
 #include "mango/manage/misc.h"
 #include "mango/manage/monitor.h"
+#include "mango/manage/client.h"
 #include "mango/switcher/switcher.h"
 #include <linux/input-event-codes.h>
 #include <scenefx/types/wlr_scene.h>
@@ -1276,8 +1277,15 @@ void pointer_warp_to_client(const Client *c) {
 void pointer_warp_to_monitor(Monitor *m) {
 	wlr_cursor_warp_closest(server.cursor, NULL, m->w.x + m->w.width / 2.0,
 							m->w.y + m->w.height / 2.0);
-	wlr_cursor_set_xcursor(server.cursor, server.cursor_manager, "default");
-	pointer_cursor_activity();
+
+
+	if (server.cursor_hidden) {
+		wl_event_source_timer_update(server.hide_cursor_source,
+									 config.cursor_hide_timeout * 1000);
+	} else {
+		wlr_cursor_set_xcursor(server.cursor, server.cursor_manager, "default");
+		pointer_cursor_activity();
+	}
 }
 
 void handle_new_virtual_pointer(struct wl_listener *listener, void *data) {

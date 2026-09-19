@@ -22,6 +22,10 @@ enum {
 	GroupBar
 }; /* client types */
 
+typedef enum { MOVE_ALL_NORMAL, MOVE_ALL_SWAP, MOVE_ALL_FALLBACK } MoveAllMode;
+
+typedef enum { WIN_ANY, WIN_TILED, WIN_FLOATING } WindowType;
+
 #ifdef XWAYLAND
 enum {
 	NetWMWindowTypeDialog,
@@ -34,7 +38,7 @@ enum {
 
 /* Movement / drop directions used by smartmove, drag-to-tile and tag
  * animations. */
-enum { UP, DOWN, LEFT, RIGHT, UNDIR, ALLDIR }; /* smartmovewin */
+enum { UP, DOWN, LEFT, RIGHT, UNDIR, ALLDIR, INDEX }; /* smartmovewin */
 
 #define ISTILED(A)                                                             \
 	(A && !(A)->isfloating && !(A)->isminimized && !(A)->iskilling &&          \
@@ -58,6 +62,11 @@ enum { UP, DOWN, LEFT, RIGHT, UNDIR, ALLDIR }; /* smartmovewin */
 #define ISFULLSCREEN(A)                                                        \
 	((A)->isfullscreen || (A)->ismaximizescreen ||                             \
 	 (A)->overview_ismaximizescreenbak || (A)->overview_isfullscreenbak)
+
+#define OVERLOAD_FOCUSTOP_1(m) client_focus_top_impl(m, true)
+#define OVERLOAD_FOCUSTOP_2(m, a) client_focus_top_impl(m, a)
+#define GET_FOCUSTOP_MACRO(_1, _2, NAME, ...) NAME
+#define client_focus_top(...) GET_FOCUSTOP_MACRO(__VA_ARGS__, OVERLOAD_FOCUSTOP_2, OVERLOAD_FOCUSTOP_1)(__VA_ARGS__)
 
 struct Client {
 	/* Must keep these three elements in this order */
@@ -224,6 +233,8 @@ struct Client {
 	Client *group_prev;
 	Client *group_next;
 	bool isgroupfocusing;
+	float custom_opacity;
+	int32_t noautofocus;
 };
 
 void client_update_geometry(Client *c);
@@ -318,12 +329,12 @@ client_center_geometry(Client *c, Monitor *tm, struct wlr_box geom,
 bool is_window_rule_matches(const ConfigWinRule *r, const char *appid,
 							const char *title);
 Client *center_tiled_select(Monitor *m);
-Client *find_client_by_direction(Client *tc, const Arg *arg, bool findfloating);
+Client *find_client_by_direction(Client *tc, const Arg *arg, WindowType mode);
 Client *direction_select(const Arg *arg);
 /* We probably should change the name of this, it sounds like
  * will focus the topmost client of this mon, when actually will
  * only return that client */
-Client *client_focus_top(Monitor *m);
+Client *client_focus_top_impl(Monitor *m, bool include_all);
 Client *get_next_stack_client(Client *c, bool reverse);
 float *get_border_color(Client *c);
 float *get_dim_color(Client *c);

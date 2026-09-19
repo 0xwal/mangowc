@@ -157,6 +157,7 @@ typedef struct {
 	uint32_t passmod;
 	xkb_keysym_t keysym;
 	KeyBinding globalkeybinding;
+	int32_t noautofocus;
 } ConfigWinRule;
 
 typedef struct {
@@ -541,6 +542,7 @@ typedef struct {
 	int32_t allow_tearing;
 	int32_t allow_shortcuts_inhibit;
 	int32_t allow_lock_transparent;
+	int32_t allow_fullscreen_opacity;
 
 	struct xkb_rule_names xkb_rules;
 	char xkb_rules_rules[128];
@@ -556,6 +558,7 @@ typedef struct {
 	DecorateDrawData jumplabeldata;
 	DecorateDrawData groupbardata;
 
+	int32_t scratchpad_focus_first;
 	int32_t hdr_depth;
 } Config;
 

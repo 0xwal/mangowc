@@ -2439,6 +2439,10 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		parse_config_file(config, value, false);
 	} else if (strncmp(key, "source", 6) == 0) {
 		parse_config_file(config, value, true);
+	} else if (strcmp(key, "allow_fullscreen_opacity") == 0) {
+		config->allow_fullscreen_opacity = atoi(value);
+	} else if (strcmp(key, "scratchpad_focus_first") == 0) {
+		config->scratchpad_focus_first = atoi(value);
 	} else {
 		mango_error(false, WLR_ERROR,
 					"Unknown keyword: "
@@ -2701,6 +2705,26 @@ int32_t parse_force(const char *str) {
 		return FORCE;
 	} else {
 		return UNFORCE;
+	}
+}
+
+WindowType parse_direction_mode(const char *str) {
+	char lowerStr[10];
+	int32_t i = 0;
+	while (str[i] && i < 9) {
+		lowerStr[i] = tolower(str[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "any") == 0) {
+		return WIN_ANY;
+	} else if (strcmp(lowerStr, "tiled") == 0) {
+		return WIN_TILED;
+	} else if (strcmp(lowerStr, "floating") == 0) {
+		return WIN_FLOATING;
+	} else {
+		return WIN_ANY;
 	}
 }
 
@@ -3868,6 +3892,12 @@ void override_config(void) {
 	config.jumplabeldata.padding_y =
 		CLAMP_INT(config.jumplabeldata.padding_y, 0, 100);
 
+	config.allow_fullscreen_opacity =
+		CLAMP_INT(config.allow_fullscreen_opacity, 0, 1);
+
+	config.scratchpad_focus_first =
+		CLAMP_INT(config.scratchpad_focus_first, 0, 1);
+
 	update_global_var();
 }
 
@@ -4173,6 +4203,10 @@ void set_value_default() {
 	config.overlaycolor[1] = 0xa5 / 255.0f;
 	config.overlaycolor[2] = 0x7c / 255.0f;
 	config.overlaycolor[3] = 1.0f;
+
+	config.allow_fullscreen_opacity = 0;
+
+	config.scratchpad_focus_first = 0;
 }
 
 void set_default_key_bindings(Config *config) {
@@ -4637,6 +4671,26 @@ int32_t reload_config(const Arg *arg) {
 	return 1;
 }
 
+MoveAllMode parse_move_all_mode(const char *str) {
+	char lowerStr[10];
+	int32_t i = 0;
+	while (str[i] && i < 9) {
+		lowerStr[i] = tolower(str[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "normal") == 0) {
+		return MOVE_ALL_NORMAL;
+	} else if (strcmp(lowerStr, "swap") == 0) {
+		return MOVE_ALL_SWAP;
+	} else if (strcmp(lowerStr, "fallback") == 0) {
+		return MOVE_ALL_FALLBACK;
+	} else {
+		return MOVE_ALL_NORMAL;
+	}
+}
+
 FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 						 char *arg_value2, char *arg_value3, char *arg_value4,
 						 char *arg_value5) {
@@ -4662,8 +4716,15 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = group_focus;
 		(*arg).i = parse_circle_direction(arg_value);
 	} else if (strcmp(func_name, "focusdir") == 0) {
+		if (arg_value && arg_value[0] && isdigit(arg_value[0])) {
+			(*arg).ui = (uint32_t)atoi(arg_value);
+			(*arg).i = INDEX;
+		} else {
+			(*arg).i = parse_direction(arg_value);
+			(*arg).i2 = parse_direction_mode(arg_value2);
+		}
+
 		func = focus_direction;
-		(*arg).i = parse_direction(arg_value);
 	} else if (strcmp(func_name, "focus_window_or_workspace") == 0) {
 		func = focus_window_or_workspace;
 		(*arg).i = parse_direction(arg_value);
@@ -4996,6 +5057,28 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = dwindle_split_vertical;
 	} else if (strcmp(func_name, "dwindle_toggle_current_split") == 0) {
 		func = dwindle_toggle_current_split;
+	} else if (strcmp(func_name, "toggle_opacity") == 0) {
+		func = toggle_opacity;
+	} else if (strcmp(func_name, "inc_opacity") == 0) {
+		(*arg).f = atof(arg_value);
+		func = inc_opacity;
+	} else if (strcmp(func_name, "dec_opacity") == 0) {
+		(*arg).f = atof(arg_value);
+		func = dec_opacity;
+	} else if (strcmp(func_name, "clear_custom_opacity") == 0) {
+		func = clear_custom_opacity;
+	} else if (strcmp(func_name, "movewindowstotag") == 0) {
+		(*arg).ui = 1 << (atoi(arg_value) - 1);
+		(*arg).i = parse_move_all_mode(arg_value2);
+		func = movewindowstotag;
+	} else if (strcmp(func_name, "toggle_noautofocus") == 0) {
+		func = toggle_noautofocus;
+	} else if (strcmp(func_name, "toggle_shadow") == 0) {
+		func = toggle_shadow;
+	} else if (strcmp(func_name, "toggle_blur") == 0) {
+		func = toggle_blur;
+	} else if (strcmp(func_name, "send_bottom") == 0) {
+		func = send_bottom;
 	} else {
 		return NULL;
 	}

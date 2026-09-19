@@ -897,8 +897,7 @@ Client *center_tiled_select(Monitor *m) {
 	return target_c;
 }
 
-Client *find_client_by_direction(Client *tc, const Arg *arg,
-								 bool findfloating) {
+Client *find_client_by_direction(Client *tc, const Arg *arg, WindowType mode) {
 	Client *c = NULL;
 	Client *tempFocusClients = NULL;
 	Client *tempSameMonitorFocusClients = NULL;
@@ -921,8 +920,11 @@ Client *find_client_by_direction(Client *tc, const Arg *arg,
 		wl_list_for_each(c, &server.clients, link) {
 			if (!c || !c->mon || c == tc)
 				continue;
-			if (!findfloating && c->isfloating)
+			if (mode == WIN_TILED && c->isfloating)
 				continue;
+			if (mode == WIN_FLOATING && !c->isfloating)
+				continue;
+
 			if (!VISIBLEON(c, c->mon))
 				continue;
 			if (c->isunglobal)
@@ -1057,13 +1059,14 @@ Client *direction_select(const Arg *arg) {
 		return NULL;
 	}
 
-	return find_client_by_direction(tc, arg, true);
+	WindowType mode = arg->i2;
+	return find_client_by_direction(tc, arg, mode);
 }
 
 /* We probably should change the name of this, it sounds like
  * will focus the topmost client of this mon, when actually will
  * only return that client */
-Client *client_focus_top(Monitor *m) {
+Client *client_focus_top_impl(Monitor *m, bool include_all) {
 	Client *c = NULL;
 
 	if (!m) {
@@ -1073,8 +1076,11 @@ Client *client_focus_top(Monitor *m) {
 	wl_list_for_each(c, &server.focus_stack, flink) {
 		if (c->iskilling || c->isunglobal)
 			continue;
-		if (VISIBLEON(c, m) && client_surface(c)->mapped)
-			return c;
+		if (!VISIBLEON(c, m) && client_surface(c)->mapped)
+			continue;
+		if (!include_all && c->noautofocus)
+			continue;
+		return c;
 	}
 	return NULL;
 }
@@ -1360,7 +1366,10 @@ void apply_rule_properties(Client *c, const ConfigWinRule *r) {
 
 	APPLY_INT_PROP(c, r, animation_type_open);
 	APPLY_INT_PROP(c, r, animation_type_close);
+
+	APPLY_INT_PROP(c, r, noautofocus);
 }
+
 void set_float_malposition(Client *tc) {
 	Client *c = NULL;
 	int32_t x, y, offset, xreverse, yreverse;
@@ -2007,6 +2016,9 @@ void init_client_properties(Client *c) {
 
 	wl_list_init(&c->link);
 	wl_list_init(&c->flink);
+
+	c->custom_opacity = 0;
+	c->noautofocus = 0;
 }
 
 void handle_client_map(struct wl_listener *listener, void *data) {
@@ -3416,6 +3428,23 @@ bool switch_scratchpad_client_state(Client *c) {
 										 c->mon->w.height / oldmon->w.height);
 
 		c->float_geom = client_center_geometry(c, c->mon, c->float_geom, 0, 0);
+
+		/*
+NOTE: this was my edition and ensure
+upstream has the same functionality
+-		set_minimized(c);
++		if (config.scratchpad_focus_first) {
++			Client *focused = focustop(c->mon);
++			if (focused == c) {
++				set_minimized(c);
++			} else {
++				focusclient(c, 1);
++			}
++		} else {
++			set_minimized(c);
++		}
++
+		*/
 
 		// Only a visible scratchpad needs focus and returns true.
 		if (SCRATCHPAD_SHOWN(c)) {
