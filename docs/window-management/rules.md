@@ -62,11 +62,11 @@ window_rule_once=Parameter:Values,Parameter:Values,app_id:Values,title:Values
 
 | Parameter | Type | Values | Description |
 | :--- | :--- | :--- | :--- |
-| `no_blur` | integer | `0` / `1` | Window does not have blur effect |
 | `no_border` | integer | `0` / `1` | Remove window border |
 | `no_shadow` | integer | `0` / `1` | Not apply shadow |
 | `no_radius` | integer | `0` / `1` | Not apply corner radius |
 | `no_animation` | integer | `0` / `1` | Not apply animation |
+| `nodim` | integer | `0` / `1` | Set to `1` to never dim the window when inactive |
 | `focused_opacity` | integer | `0` / `1` | Window focused opacity |
 | `unfocused_opacity` | integer | `0` / `1` | Window unfocused opacity |
 | `allow_csd` | integer | `0` / `1` | Allow client side decoration |
@@ -141,6 +141,9 @@ window_rule=is_named_scratchpad:1,width:1280,height:800,app_id:st-yazi
 # Custom opacity for specific apps
 window_rule=focused_opacity:0.8,app_id:firefox
 window_rule=unfocused_opacity:0.6,app_id:foot
+
+# Never dim this window when inactive
+windowrule=nodim:1,appid:mpv
 
 # Position windows relative to screen center
 window_rule=offset_x:20,offset_y:-30,width:800,height:600,app_id:alacritty

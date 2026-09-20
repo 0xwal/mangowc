@@ -1300,6 +1300,10 @@ float *get_border_color(Client *c) {
 
 float *get_dim_color(Client *c) {
 
+	if (c->nodim) {
+		return config.dim_focused_color;
+	}
+
 	if (server.selected_monitor && server.selected_monitor->sel == c) {
 		return config.dim_focused_color;
 	} else {
@@ -1517,6 +1521,7 @@ void apply_rule_properties(Client *c, const ConfigWinRule *r) {
 	APPLY_INT_PROP(c, r, activation_bypass);
 	APPLY_INT_PROP(c, r, isunglobal);
 	APPLY_INT_PROP(c, r, no_blur);
+	APPLY_INT_PROP(c, r, nodim);
 	APPLY_INT_PROP(c, r, allow_shortcuts_inhibit);
 
 	APPLY_FLOAT_PROP(c, r, scroller_proportion);
@@ -2162,6 +2167,7 @@ void init_client_properties(Client *c) {
 	c->allow_shortcuts_inhibit = SHORTCUTS_INHIBIT_ENABLE;
 	c->idleinhibit_when_focus = 0;
 	c->vrr_only_fullscreen = 0;
+	c->nodim = 0;
 	/* On unmap while in overview, destroy the card tree first to avoid a leak.
 	 */
 	overview_destroy_card(c);

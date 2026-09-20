@@ -1464,6 +1464,7 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->no_fade_in = -1;
 		rule->no_fade_out = -1;
 		rule->no_force_center = -1;
+		rule->nodim = -1;
 
 		// string rule value, relay to a client property
 		rule->animation_type_open = ANIM_TYPE_UNSET;
@@ -1590,6 +1591,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 					rule->confine_pointer = atoi(val);
 				} else if (strcmp(key, "no_blur") == 0) {
 					rule->no_blur = atoi(val);
+				} else if (strcmp(key, "nodim") == 0) {
+					rule->nodim = CLAMP_INT(atoi(val), 0, 1);
 				} else if (strcmp(key, "scroller_proportion") == 0) {
 					rule->scroller_proportion = atof(val);
 				} else if (strcmp(key, "is_fullscreen") == 0) {
@@ -1859,7 +1862,6 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 
 		config->env[config->env_count] = env;
 		config->env_count++;
-
 	} else if (strcmp(key, "var") == 0) {
 		char *comma = strchr(value, ',');
 		if (!comma) {
@@ -1883,7 +1885,6 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 			return false;
 		}
 		set_config_var(name, var_value);
-
 	} else if (strncmp(key, "exec", 9) == 0) {
 		char **new_exec =
 			realloc(config->exec, (config->exec_count + 1) * sizeof(char *));
@@ -1904,7 +1905,6 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		}
 
 		config->exec_count++;
-
 	} else if (strncmp(key, "exec_once", 9) == 0) {
 
 		char **new_exec_once = realloc(
@@ -1926,7 +1926,6 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		}
 
 		config->exec_once_count++;
-
 	} else if (regex_match("^bind[s|l|r|p|c]*$", key)) {
 		config->key_bindings =
 			realloc(config->key_bindings,
@@ -2022,7 +2021,6 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		} else {
 			config->key_bindings_count++;
 		}
-
 	} else if (strncmp(key, "mousebind", 9) == 0) {
 		config->mouse_bindings =
 			realloc(config->mouse_bindings,
@@ -2187,7 +2185,6 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		} else {
 			config->axis_bindings_count++;
 		}
-
 	} else if (strncmp(key, "switchbind", 10) == 0) {
 		config->switch_bindings = realloc(config->switch_bindings,
 										  (config->switch_bindings_count + 1) *
@@ -2259,7 +2256,6 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		} else {
 			config->switch_bindings_count++;
 		}
-
 	} else if (strncmp(key, "gesturebind", 11) == 0) {
 		config->gesture_bindings = realloc(
 			config->gesture_bindings,
@@ -2346,7 +2342,6 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		} else {
 			config->gesture_bindings_count++;
 		}
-
 	} else if (strncmp(key, "source_optional", 15) == 0) {
 		parse_config_file(config, value, false);
 	} else if (strncmp(key, "source", 6) == 0) {

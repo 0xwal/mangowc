@@ -163,6 +163,7 @@ typedef struct {
 	xkb_keysym_t keysym;
 	KeyBinding globalkeybinding;
 	int32_t noautofocus;
+	int32_t nodim;
 } ConfigWinRule;
 
 typedef struct {
