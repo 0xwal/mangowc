@@ -1137,6 +1137,10 @@ float *get_border_color(Client *c) {
 
 float *get_dim_color(Client *c) {
 
+	if (c->nodim) {
+		return config.dim_focused_color;
+	}
+
 	if (server.selected_monitor && server.selected_monitor->sel == c) {
 		return config.dim_focused_color;
 	} else {
@@ -1351,6 +1355,7 @@ void apply_rule_properties(Client *c, const ConfigWinRule *r) {
 	APPLY_INT_PROP(c, r, activation_bypass);
 	APPLY_INT_PROP(c, r, isunglobal);
 	APPLY_INT_PROP(c, r, noblur);
+	APPLY_INT_PROP(c, r, nodim);
 	APPLY_INT_PROP(c, r, allow_shortcuts_inhibit);
 
 	APPLY_FLOAT_PROP(c, r, scroller_proportion);
@@ -1945,6 +1950,7 @@ void init_client_properties(Client *c) {
 	c->nofocus = 0;
 	c->nofadein = 0;
 	c->nofadeout = 0;
+	c->nodim = 0;
 	c->no_force_center = 0;
 	c->isnoborder = 0;
 	c->isnosizehint = 0;

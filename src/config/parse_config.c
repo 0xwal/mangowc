@@ -1605,6 +1605,7 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->noswallow = -1;
 		rule->noblur = -1;
 		rule->nofocus = -1;
+		rule->nodim = -1;
 		rule->nofadein = -1;
 		rule->nofadeout = -1;
 		rule->no_force_center = -1;
@@ -1732,6 +1733,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 					rule->noswallow = atoi(val);
 				} else if (strcmp(key, "noblur") == 0) {
 					rule->noblur = atoi(val);
+				} else if (strcmp(key, "nodim") == 0) {
+					rule->nodim = CLAMP_INT(atoi(val), 0, 1);
 				} else if (strcmp(key, "scroller_proportion") == 0) {
 					rule->scroller_proportion = atof(val);
 				} else if (strcmp(key, "isfullscreen") == 0) {
