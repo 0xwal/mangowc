@@ -153,6 +153,7 @@ typedef struct {
 	int32_t noswallow;
 	int32_t confine_pointer;
 	int32_t noblur;
+	int32_t nodim;
 	float focused_opacity;
 	float unfocused_opacity;
 	float scroller_proportion_single;
