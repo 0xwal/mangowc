@@ -253,6 +253,7 @@ layerrule=layer_name:Values,Parameter:Values,Parameter:Values
 | Parameter | Type | Values | Description |
 | :--- | :--- | :--- | :--- |
 | `layer_name` | string | layer name | Match name of layer, supports regex |
+| `monitor` | string | monitor name | Regex, matches monitor name; empty = all monitors. Forces the layer to render on that output — the first matching rule wins, and if the output is absent it falls back to the client's/selected monitor |
 | `animation_type_open` | string | slide, zoom, fade, none | Set open animation |
 | `animation_type_close` | string | slide, zoom, fade, none | Set close animation |
 | `noblur` | integer | `0` / `1` | Disable blur |
@@ -270,6 +271,9 @@ layerrule=noanim:1,noblur:1,layer_name:selection
 
 # Zoom animation for Rofi with multiple parameters
 layerrule=animation_type_open:zoom,noanim:0,layer_name:rofi
+
+# No blur or animation for Rofi, forced onto the eDP-1 monitor
+layerrule=noanim:1,noblur:1,layer_name:rofi,monitor:eDP-1
 
 # Disable animations and shadows for notification daemon
 layerrule=noanim:1,noshadow:1,layer_name:swaync

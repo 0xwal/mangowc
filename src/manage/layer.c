@@ -195,7 +195,10 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
 	// Applies the layer rule.
 	for (ji = 0; ji < config.layer_rules_count; ji++) {
 		if (regex_match(config.layer_rules[ji].layer_name,
-						l->layer_surface->namespace)) {
+						l->layer_surface->namespace) &&
+			(config.layer_rules[ji].monitor == NULL ||
+			 regex_match(config.layer_rules[ji].monitor,
+						 l->mon->wlr_output->name))) {
 
 			r = &config.layer_rules[ji];
 			APPLY_INT_PROP(l, r, shield_when_capture);
@@ -465,7 +468,6 @@ void handle_new_layer_surface(struct wl_listener *listener, void *data) {
 	struct wlr_surface *surface = layer_surface->surface;
 	struct wlr_scene_tree *scene_layer =
 		server.layers[layermap[layer_surface->pending.layer]];
-
 	if (!layer_surface->output &&
 		!(layer_surface->output = server.selected_monitor
 									  ? server.selected_monitor->wlr_output
@@ -482,6 +484,29 @@ void handle_new_layer_surface(struct wl_listener *listener, void *data) {
 	LISTEN(&surface->events.commit, &l->surface_commit,
 		   handle_layer_surface_commit);
 	LISTEN(&surface->events.unmap, &l->unmap, handle_layer_surface_unmap);
+
+	// A layerrule's monitor overrides the client's chosen output. The
+	// first rule whose namespace matches AND whose monitor resolves to a
+	// connected monitor wins; rules with an unresolvable monitor are
+	// skipped so later rules get a chance.
+	for (int32_t ji = 0; ji < config.layer_rules_count; ji++) {
+		if (config.layer_rules[ji].monitor != NULL &&
+			regex_match(config.layer_rules[ji].layer_name,
+						layer_surface->namespace)) {
+			bool placed = false;
+			Monitor *m;
+			wl_list_for_each(m, &server.monitors, link) {
+				if (regex_match(config.layer_rules[ji].monitor,
+								m->wlr_output->name)) {
+					layer_surface->output = m->wlr_output;
+					placed = true;
+					break;
+				}
+			}
+			if (placed)
+				break;
+		}
+	}
 
 	l->layer_surface = layer_surface;
 	l->mon = layer_surface->output->data;
