@@ -579,6 +579,9 @@ cJSON *build_client_json(Client *c) {
 	cJSON_AddBoolToObject(obj, "is_global", c->isglobal);
 	cJSON_AddBoolToObject(obj, "is_unglobal", c->isunglobal);
 	cJSON_AddBoolToObject(obj, "is_overlay", c->isoverlay);
+	/* [fork] layer rule: effective scene layer + forced override for IPC */
+	cJSON_AddNumberToObject(obj, "layer", (double)client_target_layer(c));
+	cJSON_AddNumberToObject(obj, "layer_override", (double)c->forced_layer);
 	cJSON_AddBoolToObject(obj, "is_fakefullscreen", c->isfakefullscreen);
 	cJSON_AddBoolToObject(obj, "is_minimized", c->isminimized);
 	cJSON_AddBoolToObject(obj, "is_urgent", c->isurgent);

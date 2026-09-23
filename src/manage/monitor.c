@@ -6,6 +6,7 @@
 #include "mango/common/server.h"
 #include "mango/common/util.h"
 #include "mango/dispatch/bind.h"
+#include "mango/draw/toast.h"
 #include "mango/ext-protocol/ext-workspace.h"
 #include "mango/ext-protocol/foreign-toplevel.h"
 #include "mango/ext-protocol/hdr.h"
@@ -872,6 +873,8 @@ void handle_output_destroy(struct wl_listener *listener, void *data) {
 		wl_event_source_remove(m->skip_frame_timeout);
 		m->skip_frame_timeout = NULL;
 	}
+	/* [fork] toast overlay: drop any active toast before the monitor is freed */
+	mango_toast_destroy(m);
 	m->wlr_output->data = NULL;
 	xdg_output_cleanup_output(m->wlr_output);
 

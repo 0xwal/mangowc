@@ -30,6 +30,7 @@ windowrule-once=Parameter:Values,Parameter:Values,appid:Values,title:Values
 | `isfakefullscreen` | integer | `0` / `1` | Force fake-fullscreen state (window stays constrained) |
 | `isglobal` | integer | `0` / `1` | Open as global window (sticky across tags) |
 | `isoverlay` | integer | `0` / `1` | Make it always in top layer |
+| `layer` | string / integer | `bg`, `blur`, `bottom`, `tile`, `maximize`, `float`, `top`, `fullscreen`, `fadeout`, `overlay`, `none`, or a layer index `0`-`7`, `14`, `15` | Pin the window to a specific scene layer, overriding the layer derived from the window state (`isoverlay`, `float_full_to_top`, special-workspace routing). Special-workspace layers (`special*`) are NOT supported and are rejected. `layer:none` maps to auto (like an absent key) and cannot unpin a window pinned by an earlier rule. Re-derived on config reload. `windowrule-once` layer pins apply at map time only and are not re-derived on reload (like other once-props) — the window returns to auto |
 | `isopensilent` | integer | `0` / `1` | Open without focus |
 | `istagsilent` | integer | `0` / `1` | Don't focus if client is not in current view tag |
 | `force_fakemaximize` | integer | `0` / `1` (default 1) | The state of client set to fake maximized |
@@ -258,6 +259,7 @@ layerrule=layer_name:Values,Parameter:Values,Parameter:Values
 | Parameter | Type | Values | Description |
 | :--- | :--- | :--- | :--- |
 | `layer_name` | string | layer name | Match name of layer, supports regex |
+| `layer` | string / integer | `bg`, `blur`, `bottom`, `tile`, `maximize`, `float`, `top`, `fullscreen`, `fadeout`, `overlay`, `none`, or a layer index `0`-`7`, `14`, `15` | Pin the layer surface to a specific scene layer. `layer:none` maps to auto (like an absent key). Geometry/anchor math still comes from wlr's own layer (pinning to `bg` can hide a surface under the background color); popups still follow the wlr layer; shadow/blur move with the surface into the pinned layer. Re-derived on config reload |
 | `monitor` | string | monitor name | Regex, matches monitor name; empty = all monitors. Forces the layer to render on that output — the first matching rule wins, and if the output is absent it falls back to the client's/selected monitor |
 | `animation_type_open` | string | slide, zoom, fade, none | Set open animation |
 | `animation_type_close` | string | slide, zoom, fade, none | Set close animation |
@@ -282,6 +284,9 @@ layerrule=noanim:1,noblur:1,layer_name:rofi,monitor:eDP-1
 
 # Disable animations and shadows for notification daemon
 layerrule=noanim:1,noshadow:1,layer_name:swaync
+
+# Pin the notification daemon into the top scene layer
+layerrule=layer:top,layer_name:swaync
 
 # Multiple effects for launcher
 layerrule=animation_type_open:slide,animation_type_close:fade,noblur:1,layer_name:wofi

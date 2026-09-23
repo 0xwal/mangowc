@@ -237,6 +237,8 @@ struct Client {
 	bool isgroupfocusing;
 	float custom_opacity;
 	int32_t noautofocus;
+	/* [fork] layer rule: forced scene layer, -1 = auto */
+	int32_t forced_layer;
 };
 
 void client_update_geometry(Client *c);
@@ -350,6 +352,8 @@ void set_float_malposition(Client *tc);
 void client_reset_mon_tags(Client *c, Monitor *mon, uint32_t newtags);
 void check_match_tag_floating_rule(Client *c, Monitor *mon);
 void client_apply_rules(Client *c);
+/* [fork] layer rule: re-derive forced layers on config reload */
+void reapply_window_layer_rules(void);
 void apply_window_snap(Client *c);
 /*
  * Client management: window lifecycle, rules, focus, tiled/floating/fullscreen

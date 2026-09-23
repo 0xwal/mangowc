@@ -45,6 +45,10 @@ enum animation_type {
 };
 
 int32_t animation_type_from_string(const char *value);
+bool parse_layer_value(const char *value, int32_t *out);
+/* [fork] toast overlay: display name for a scene layer index (e.g. "overlay"),
+ * "unknown" for out-of-range indices. */
+const char *layer_name(int32_t idx);
 
 enum tearing_mode {
 	TEARING_DISABLED = 0,
@@ -160,6 +164,8 @@ typedef struct {
 	xkb_keysym_t keysym;
 	KeyBinding globalkeybinding;
 	int32_t noautofocus;
+	/* [fork] layer rule: forced scene layer, -1 = auto */
+	int32_t layer;
 } ConfigWinRule;
 
 typedef struct {
@@ -213,6 +219,8 @@ typedef struct {
 	int32_t noblur;
 	int32_t noanim;
 	int32_t noshadow;
+	/* [fork] layer rule: forced scene layer, -1 = auto */
+	int32_t layer;
 } ConfigLayerRule;
 
 typedef struct {

@@ -66,6 +66,9 @@ You can also color-code windows based on their state:
 | `jump_label_decorate_padding_y` | `10` | vertical padding.|
 | `jump_label_decorate_font_desc` | `monospace Bold 16` | font set.|
 
+Layer-keybind toasts (`send_back`/`bring_front`/`set_layer`) reuse this chip
+style.
+
 ### Tab Bar For Monocle Layout
 | Setting | Default | Description |
 | :--- | :--- | :--- |

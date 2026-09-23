@@ -114,6 +114,25 @@ bindr=Super,Super_L,spawn,rofi -show run
 | `toggle_special_tag` | - | Toggle special workspace overlay (tiling scratchpad). |
 | `tag_special_tag` | - | Move focused window to/from the special workspace overlay. |
 | `tag_special_silent` | - | Silently move focused window to/from the special workspace overlay. |
+| `send_back` | - | Step the focused client window one scene layer **down** in the client-layer cycle, clamped at `bottom` (never below it). |
+| `bring_front` | - | Step the focused client window one scene layer **up** in the client-layer cycle, clamped at `overlay`. |
+| `set_layer` | `name/number/none` | Pin the focused client window to an absolute scene layer. Accepts `bg`, `blur`, `bottom`, `tile`, `maximize`, `float`, `top`, `fullscreen`, `fadeout`, `overlay`, `none` (or a matching layer index; use `bg` or `00` for index 0, since a bare `0` is treated as "no argument"). `none`/`auto` returns the window to its automatic layer. |
+
+The client-layer cycle (bottom → top, no wrap-around, step + clamp) is:
+`bottom` → `tile` → `maximize` → `float` → `top` → `fullscreen` → `overlay`.
+`send_back`/`bring_front` step one entry and stop at the ends; windows whose
+current layer sits between cycle entries (e.g. special-workspace layers) start
+from the nearest entry at or below it.
+
+> **Note:** These actions affect client windows only (not layer-shell surfaces —
+> that is `layerrule`). A bind-set layer persists until the next config reload,
+> which re-derives window layers from `windowrule` (a bind-set value is lost).
+
+> **Note:** `send_back`, `bring_front` and `set_layer` flash a centered,
+> non-interactive toast on the client window showing the effective
+> scene layer as `name (index)` (e.g. `top (6)`, `overlay (15)`), styled per
+> `jump_label_decorate_*` (see [Theming](/docs/visuals/theming.md)); it
+> auto-hides after ~500ms.
 
 ### Focus & Movement
 

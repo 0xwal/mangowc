@@ -24,6 +24,9 @@
 #define PERTAG_SLOTS (tag_num_MAX + 1)
 #endif
 
+/* [fork] toast overlay: per-monitor layer toast, see mango/draw/toast.h */
+struct mango_toast;
+
 struct Monitor {
 	struct wl_list link;
 	struct wlr_output *wlr_output;
@@ -35,6 +38,7 @@ struct Monitor {
 	struct wl_listener destroy_lock_surface;
 	struct wlr_session_lock_surface_v1 *lock_surface;
 	struct wl_event_source *skip_frame_timeout;
+	struct mango_toast *toast; /* [fork] toast overlay: active toast or NULL */
 	struct wlr_box m;		  /* monitor area, layout-relative */
 	struct wlr_box w;		  /* window area, layout-relative */
 	struct wl_list layers[4]; /* LayerSurface::link */

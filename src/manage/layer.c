@@ -191,6 +191,8 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
 	l->need_output_flush = true;
 	l->animation_type_open = ANIM_TYPE_UNSET;
 	l->animation_type_close = ANIM_TYPE_UNSET;
+	/* [fork] layer rule: forced layer reset on map */
+	l->forced_layer = -1;
 
 	// Applies the layer rule.
 	for (ji = 0; ji < config.layer_rules_count; ji++) {
@@ -207,6 +209,22 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
 			APPLY_INT_PROP(l, r, noshadow);
 			APPLY_INT_PROP(l, r, animation_type_open);
 			APPLY_INT_PROP(l, r, animation_type_close);
+			/* [fork] layer rule: forced scene layer override (-1 = auto) */
+			if (r->layer >= 0)
+				l->forced_layer = r->layer;
+		}
+	}
+
+	/* [fork] layer rule: reparent into the forced scene layer, popups stay
+	 * under the wlr layer tree */
+	{
+		struct wlr_scene_tree *target;
+		if (l->forced_layer >= 0)
+			target = server.layers[l->forced_layer];
+		else
+			target = server.layers[layermap[layer_surface->current.layer]];
+		if (target != l->scene->node.parent) {
+			wlr_scene_node_reparent(&l->scene->node, target);
 		}
 	}
 
@@ -329,8 +347,12 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
 	l->mapped = layer_surface->surface->mapped;
 
 	if (layer_surface->current.committed & WLR_LAYER_SURFACE_V1_STATE_LAYER) {
-		if (scene_layer != l->scene->node.parent) {
-			wlr_scene_node_reparent(&l->scene->node, scene_layer);
+		/* [fork] layer rule: derive target layer from forced_layer or current layer */
+		struct wlr_scene_tree *layer_target =
+			l->forced_layer >= 0 ? server.layers[l->forced_layer]
+								 : scene_layer;
+		if (layer_target != l->scene->node.parent) {
+			wlr_scene_node_reparent(&l->scene->node, layer_target);
 			wl_list_remove(&l->link);
 			wl_list_insert(&l->mon->layers[layer_surface->current.layer],
 						   &l->link);
@@ -480,6 +502,8 @@ void handle_new_layer_surface(struct wl_listener *listener, void *data) {
 	l->type = LayerShell;
 	l->animation_type_open = ANIM_TYPE_UNSET;
 	l->animation_type_close = ANIM_TYPE_UNSET;
+	/* [fork] layer rule: forced layer reset on init */
+	l->forced_layer = -1;
 	LISTEN(&surface->events.map, &l->map, handle_layer_surface_map);
 	LISTEN(&surface->events.commit, &l->surface_commit,
 		   handle_layer_surface_commit);
@@ -560,4 +584,47 @@ void handle_layer_surface_unmap(struct wl_listener *listener, void *data) {
 	wlr_scene_node_destroy(&l->shadow->node);
 	l->shadow = NULL;
 	l->being_unmapped = false;
+}
+
+/* [fork] layer rule: re-derive forced layers on config reload */
+void reapply_layer_layer_rules(void) {
+	Monitor *m;
+	LayerSurface *l;
+	ConfigLayerRule *r;
+	struct wlr_scene_tree *target;
+	int32_t i, ji;
+
+	wl_list_for_each(m, &server.monitors, link) {
+		for (i = 0; i < (int32_t)LENGTH(m->layers); i++) {
+			wl_list_for_each(l, &m->layers[i], link) {
+				if (!l->mapped)
+					continue;
+
+				l->forced_layer = -1;
+
+				for (ji = 0; ji < config.layer_rules_count; ji++) {
+					r = &config.layer_rules[ji];
+					if (regex_match(r->layer_name,
+									l->layer_surface->namespace) &&
+						(r->monitor == NULL ||
+						 regex_match(r->monitor,
+									 l->mon->wlr_output->name))) {
+						/* [fork] layer rule: forced scene layer override (-1 = auto) */
+						if (r->layer >= 0)
+							l->forced_layer = r->layer;
+					}
+				}
+
+				/* [fork] layer rule: mirror commit-handler reparenting, the
+				 * wl_list link stays under the wlr layer */
+				if (l->forced_layer >= 0)
+					target = server.layers[l->forced_layer];
+				else
+					target = server.layers[layermap[l->layer_surface->current.layer]];
+				if (target != l->scene->node.parent) {
+					wlr_scene_node_reparent(&l->scene->node, target);
+				}
+			}
+		}
+	}
 }

@@ -1,10 +1,12 @@
 #include "mango/config/parse_config.h"
 
 #include <ctype.h>
+#include <errno.h>
 #include <libgen.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "mango/animation/common.h"
@@ -428,6 +430,105 @@ int32_t animation_type_from_string(const char *value) {
 	if (strcmp(value, "zoom") == 0)
 		return ANIM_TYPE_ZOOM;
 	return ANIM_TYPE_UNKNOWN;
+}
+
+/* [fork] toast overlay: scene-layer display names. The six LyrSpecial* entries
+ * are DISPLAY-ONLY (each > 10 chars, so the strlen guard inside
+ * parse_layer_value keeps them out of config parsing; they exist so
+ * layer_name() can resolve the special-workspace layers to a readable name).
+ * Note: this is a pure hoist of the table previously local to
+ * parse_layer_value — values, order and parse behavior are unchanged. */
+static const char *const layer_names[NUM_LAYERS] = {
+	[LyrBg] = "bg",
+	[LyrBlur] = "blur",
+	[LyrBottom] = "bottom",
+	[LyrTile] = "tile",
+	[LyrMaximize] = "maximize",
+	[LyrFloat] = "float",
+	[LyrTop] = "top",
+	[LyrFullscreen] = "fullscreen",
+	[LyrSpecialDim] = "special_dim",
+	[LyrSpecialTile] = "special_tile",
+	[LyrSpecialMaximize] = "special_maximize",
+	[LyrSpecialTop] = "special_top",
+	[LyrSpecialFloat] = "special_float",
+	[LyrSpecialFullscreen] = "special_fullscreen",
+	[LyrFadeOut] = "fadeout",
+	[LyrOverlay] = "overlay",
+	[LyrIMPopup] = "im_popup",
+	[LyrBlock] = "block",
+};
+
+bool parse_layer_value(const char *value, int32_t *out) {
+	char lowerStr[32];
+	int32_t i = 0, j = 0;
+
+	if (!value || !value[0])
+		return false;
+
+	if (strlen(value) > strlen(layer_names[LyrFullscreen]))
+		return false;
+
+	while (value[i] && i < (int32_t)sizeof(lowerStr) - 1) {
+		lowerStr[i] = tolower(value[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "none") == 0 || strcmp(lowerStr, "auto") == 0 ||
+		strcmp(lowerStr, "unset") == 0) {
+		*out = -1;
+		return true;
+	}
+
+	for (i = 0; i < NUM_LAYERS; i++) {
+		if (!layer_names[i] || strcmp(lowerStr, layer_names[i]) != 0)
+			continue;
+		switch (i) {
+		case LyrIMPopup:
+		case LyrBlock:
+			return false;
+		default:
+			break;
+		}
+		*out = i;
+		return true;
+	}
+
+	if (isdigit(lowerStr[0])) {
+		for (j = 0; lowerStr[j]; j++)
+			if (!isdigit((unsigned char)lowerStr[j]))
+				return false;
+		errno = 0;
+		long n = strtol(lowerStr, NULL, 10);
+		if (errno != ERANGE && n >= 0 && n < NUM_LAYERS) {
+			switch (n) {
+			case LyrIMPopup:
+			case LyrBlock:
+			case LyrSpecialDim:
+			case LyrSpecialTile:
+			case LyrSpecialMaximize:
+			case LyrSpecialTop:
+			case LyrSpecialFloat:
+			case LyrSpecialFullscreen:
+				return false;
+			default:
+				break;
+			}
+			*out = (int32_t)n;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/* [fork] toast overlay: resolve a scene layer index to its display name;
+ * out-of-range indices fall back to "unknown". */
+const char *layer_name(int32_t idx) {
+	if (idx >= 0 && idx < NUM_LAYERS)
+		return layer_names[idx];
+	return "unknown";
 }
 
 bool parse_option(Config *config, char *key, char *value, int line_number) {
@@ -1518,6 +1619,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->noblur = 0;
 		rule->noanim = 0;
 		rule->noshadow = 0;
+		/* [fork] layer rule: forced scene layer override (-1 = auto) */
+		rule->layer = -1;
 
 		bool parse_error = false;
 		char *token = strtok(value, ",");
@@ -1531,7 +1634,11 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 				trim_whitespace(key);
 				trim_whitespace(val);
 
-				if (strcmp(key, "layer_name") == 0) {
+				if (strcmp(key, "layer") == 0) {
+					/* [fork] layer rule: forced scene layer override (-1 = auto) */
+					if (!parse_layer_value(val, &rule->layer))
+						parse_error = true;
+				} else if (strcmp(key, "layer_name") == 0) {
 					rule->layer_name = strdup(val);
 				} else if (strcmp(key, "monitor") == 0) {
 					rule->monitor = strdup(val);
@@ -1626,6 +1733,7 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->nofadein = -1;
 		rule->nofadeout = -1;
 		rule->no_force_center = -1;
+		rule->layer = -1;
 
 		// string rule value, relay to a client property
 		rule->animation_type_open = ANIM_TYPE_UNSET;
@@ -1718,6 +1826,9 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 					rule->focused_opacity = atof(val);
 				} else if (strcmp(key, "isoverlay") == 0) {
 					rule->isoverlay = atoi(val);
+				} else if (strcmp(key, "layer") == 0) {
+					if (!parse_layer_value(val, &rule->layer))
+						parse_error = true;
 				} else if (strcmp(key, "shield_when_capture") == 0) {
 					rule->shield_when_capture = atoi(val);
 				} else if (strcmp(key, "allow_shortcuts_inhibit") == 0) {
@@ -2697,6 +2808,9 @@ void reset_option(void) {
 
 	reapply_cursor_style();
 	reapply_property();
+	/* [fork] layer rule: re-derive forced layers on config reload */
+	reapply_window_layer_rules();
+	reapply_layer_layer_rules();
 	reapply_rootbg();
 	reapply_keyboard();
 	reapply_pointer();
@@ -5226,6 +5340,19 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = toggle_blur;
 	} else if (strcmp(func_name, "send_bottom") == 0) {
 		func = send_bottom;
+	} else if (strcmp(func_name, "send_back") == 0) {
+		/* [fork] layer keybind: focused client window one layer down in the
+		 * client-layer cycle */
+		func = send_back;
+	} else if (strcmp(func_name, "bring_front") == 0) {
+		/* [fork] layer keybind: focused client window one layer up in the
+		 * client-layer cycle */
+		func = bring_front;
+	} else if (strcmp(func_name, "set_layer") == 0) {
+		/* [fork] layer keybind: absolute scene layer for the focused client
+		 * window; parsed at dispatch time via parse_layer_value */
+		func = set_layer;
+		(*arg).v = strdup(arg_value);
 	} else {
 		return NULL;
 	}
