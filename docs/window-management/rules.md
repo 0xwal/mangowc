@@ -99,7 +99,7 @@ window_rule_once=Parameter:Values,Parameter:Values,app_id:Values,title:Values
 | Parameter | Type | Values | Description |
 | :--- | :--- | :--- | :--- |
 | `is_term` | integer | `0` / `1` | A new GUI window will replace the is_term window when it is opened |
-| `no_swallow` | integer | `0` / `1` | The window will not replace the is_term window |
+| `no_swallow` | integer | `0` / `1` | The window will not replace the isterm window, and an isterm window with `noswallow` cannot be replaced |
 
 For per-instance control at runtime, the keybindable `toggleswallow` dispatch flips `noswallow` on the focused window, as an alternative to the static `isterm`/`noswallow` rules above.
 

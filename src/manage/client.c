@@ -917,8 +917,8 @@ Client *client_find_terminal(Client *w) {
 		return NULL;
 
 	wl_list_for_each(c, &server.focus_stack, flink) {
-		if (c->isterm && !c->no_swallow && !c->swallowdby && c->pid &&
-			is_descendant_process(c->pid, w->pid)) {
+		if (c->isterm && !c->no_swallow && !c->swallowdby && !c->swallowing &&
+			c->pid && is_descendant_process(c->pid, w->pid)) {
 			return c;
 		}
 	}
@@ -1747,7 +1747,7 @@ void client_apply_rules(Client *c, Monitor **rule_mon, uint32_t *rule_tags) {
 	// apply swallow rule
 	c->pid = client_get_pid(c);
 	if (!c->no_swallow && !c->isfloating && !client_is_float_type(c) &&
-		!c->surface.xdg->initial_commit) {
+		!c->swallowing && !c->surface.xdg->initial_commit) {
 		Client *p = client_find_terminal(c);
 		if (p && !p->isminimized) {
 			c->swallowing = p;
