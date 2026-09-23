@@ -592,6 +592,8 @@ cJSON *build_client_json(Client *c) {
 	cJSON_AddBoolToObject(obj, "is_group", client_is_group_member(c));
 	cJSON_AddBoolToObject(obj, "is_group_focus",
 						  client_is_group_member(c) && c->is_group_focus);
+	cJSON_AddBoolToObject(obj, "noswallow", c->no_swallow ? true : false);
+	cJSON_AddBoolToObject(obj, "isterm", c->isterm ? true : false);
 	cJSON_AddBoolToObject(obj, "is_visible", c->mon && VISIBLEON(c, c->mon));
 	cJSON_AddBoolToObject(obj, "is_focused", c->isfocusing);
 	cJSON_AddBoolToObject(obj, "is_fullscreen", c->isfullscreen);

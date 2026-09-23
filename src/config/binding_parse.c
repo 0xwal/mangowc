@@ -525,7 +525,7 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 			(*arg).i = parse_direction(arg_value);
 			(*arg).i2 = parse_direction_mode(arg_value2);
 		}
- 		func = focus_direction;
+		func = focus_direction;
 	} else if (strcmp(func_name, "focus_window_or_workspace") == 0) {
 		func = focus_window_or_workspace;
 		(*arg).i = parse_direction(arg_value);
@@ -884,6 +884,8 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = toggle_blur;
 	} else if (strcmp(func_name, "send_bottom") == 0) {
 		func = send_bottom;
+	} else if (strcmp(func_name, "toggleswallow") == 0) {
+		func = toggle_swallow;
 	} else {
 		return NULL;
 	}

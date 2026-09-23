@@ -101,6 +101,8 @@ window_rule_once=Parameter:Values,Parameter:Values,app_id:Values,title:Values
 | `is_term` | integer | `0` / `1` | A new GUI window will replace the is_term window when it is opened |
 | `no_swallow` | integer | `0` / `1` | The window will not replace the is_term window |
 
+For per-instance control at runtime, the keybindable `toggleswallow` dispatch flips `noswallow` on the focused window, as an alternative to the static `isterm`/`noswallow` rules above.
+
 ### Global & Special Windows
 
 | Parameter | Type | Values | Description |
@@ -154,6 +156,9 @@ window_rule=tags:9,monitor:HDMI-A-1,app_id:discord
 # Terminal swallowdby setup
 window_rule=is_term:1,app_id:st
 window_rule=no_swallow:1,app_id:foot
+
+# Toggle swallow on the focused window at runtime (alternative to rules above)
+bind=SUPER,T,toggleswallow
 
 # Disable client-side decorations
 window_rule=allow_csd:1,app_id:firefox
