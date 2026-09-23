@@ -700,22 +700,6 @@
  	return hit_no_border;
  }
  
- Client *termforwin(Client *w) {
- 	Client *c = NULL;
- 
- 	if (!w->pid || w->isterm || w->noswallow)
- 		return NULL;
- 
- 	wl_list_for_each(c, &fstack, flink) {
- 		if (c->isterm && !c->swallowdby && c->pid &&
- 			isdescprocess(c->pid, w->pid)) {
- 			return c;
- 		}
- 	}
- 
- 	return NULL;
- }
- 
  Client *get_client_by_id_or_title(const char *arg_id, const char *arg_title) {
  	Client *target_client = NULL;
  	const char *appid, *title;
