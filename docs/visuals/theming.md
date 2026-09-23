@@ -67,6 +67,11 @@ You can also color-code windows based on their state:
 | `jump_label_decorate_font_desc` | `monospace Bold 16` | font set.|
 
 ### Group Bar
+Layer-keybind toasts (`send_back`/`bring_front`/`set_layer`) reuse this chip
+style.
+
+### Tab Bar For Monocle Layout
+>>>>>>> conflict 1 of 1 ends
 | Setting | Default | Description |
 | :--- | :--- | :--- |
 | `always_show_group_bar` | `0` | Show the group bar on every window. |

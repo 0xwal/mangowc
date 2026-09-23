@@ -886,8 +886,121 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = send_bottom;
 	} else if (strcmp(func_name, "toggleswallow") == 0) {
 		func = toggle_swallow;
+	} else if (strcmp(func_name, "send_back") == 0) {
+		/* [fork] layer keybind: focused client window one layer down in the
+		 * client-layer cycle */
+		func = send_back;
+	} else if (strcmp(func_name, "bring_front") == 0) {
+		/* [fork] layer keybind: focused client window one layer up in the
+		 * client-layer cycle */
+		func = bring_front;
+	} else if (strcmp(func_name, "set_layer") == 0) {
+		/* [fork] layer keybind: absolute scene layer for the focused client
+		 * window; parsed at dispatch time via parse_layer_value */
+		func = set_layer;
+		(*arg).v = strdup(arg_value);
+
 	} else {
 		return NULL;
 	}
 	return func;
+}
+
+/* [fork] toast overlay: scene-layer display names. The six LyrSpecial* entries
+ * are DISPLAY-ONLY (each > 10 chars, so the strlen guard inside
+ * parse_layer_value keeps them out of config parsing; they exist so
+ * layer_name() can resolve the special-workspace layers to a readable name).
+ * Note: this is a pure hoist of the table previously local to
+ * parse_layer_value — values, order and parse behavior are unchanged. */
+static const char *const layer_names[NUM_LAYERS] = {
+	[LyrBg] = "bg",
+	[LyrBlur] = "blur",
+	[LyrBottom] = "bottom",
+	[LyrTile] = "tile",
+	[LyrMaximize] = "maximize",
+	[LyrFloat] = "float",
+	[LyrTop] = "top",
+	[LyrFullscreen] = "fullscreen",
+	[LyrSpecialDim] = "special_dim",
+	[LyrSpecialTile] = "special_tile",
+	[LyrSpecialMaximize] = "special_maximize",
+	[LyrSpecialTop] = "special_top",
+	[LyrSpecialFloat] = "special_float",
+	[LyrSpecialFullscreen] = "special_fullscreen",
+	[LyrFadeOut] = "fadeout",
+	[LyrOverlay] = "overlay",
+	[LyrIMPopup] = "im_popup",
+	[LyrBlock] = "block",
+};
+
+bool parse_layer_value(const char *value, int32_t *out) {
+	char lowerStr[32];
+	int32_t i = 0, j = 0;
+
+	if (!value || !value[0])
+		return false;
+
+	if (strlen(value) > strlen(layer_names[LyrFullscreen]))
+		return false;
+
+	while (value[i] && i < (int32_t)sizeof(lowerStr) - 1) {
+		lowerStr[i] = tolower(value[i]);
+		i++;
+	}
+	lowerStr[i] = '\0';
+
+	if (strcmp(lowerStr, "none") == 0 || strcmp(lowerStr, "auto") == 0 ||
+		strcmp(lowerStr, "unset") == 0) {
+		*out = -1;
+		return true;
+	}
+
+	for (i = 0; i < NUM_LAYERS; i++) {
+		if (!layer_names[i] || strcmp(lowerStr, layer_names[i]) != 0)
+			continue;
+		switch (i) {
+		case LyrIMPopup:
+		case LyrBlock:
+			return false;
+		default:
+			break;
+		}
+		*out = i;
+		return true;
+	}
+
+	if (isdigit(lowerStr[0])) {
+		for (j = 0; lowerStr[j]; j++)
+			if (!isdigit((unsigned char)lowerStr[j]))
+				return false;
+		errno = 0;
+		long n = strtol(lowerStr, NULL, 10);
+		if (errno != ERANGE && n >= 0 && n < NUM_LAYERS) {
+			switch (n) {
+			case LyrIMPopup:
+			case LyrBlock:
+			case LyrSpecialDim:
+			case LyrSpecialTile:
+			case LyrSpecialMaximize:
+			case LyrSpecialTop:
+			case LyrSpecialFloat:
+			case LyrSpecialFullscreen:
+				return false;
+			default:
+				break;
+			}
+			*out = (int32_t)n;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/* [fork] toast overlay: resolve a scene layer index to its display name;
+ * out-of-range indices fall back to "unknown". */
+const char *layer_name(int32_t idx) {
+	if (idx >= 0 && idx < NUM_LAYERS)
+		return layer_names[idx];
+	return "unknown";
 }

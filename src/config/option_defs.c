@@ -1359,6 +1359,7 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->no_blur = 0;
 		rule->no_animation = 0;
 		rule->no_shadow = 0;
+		rule->layer = -1;
 
 		bool parse_error = false;
 		char *token = strtok(value, ",");
@@ -1374,6 +1375,11 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 
 				if (strcmp(key, "layer_name") == 0) {
 					rule->layer_name = strdup(val);
+				} else if (strcmp(key, "layer") == 0) {
+					/* [fork] layer rule: forced scene layer override (-1 =
+					 * auto) */
+					if (!parse_layer_value(val, &rule->layer))
+						parse_error = true;
 				} else if (strcmp(key, "monitor") == 0) {
 					rule->monitor = strdup(val);
 				} else if (strcmp(key, "animation_type_open") == 0) {
@@ -1467,6 +1473,7 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->no_fade_in = -1;
 		rule->no_fade_out = -1;
 		rule->no_force_center = -1;
+		rule->layer = -1;
 		rule->nodim = -1;
 
 		// string rule value, relay to a client property

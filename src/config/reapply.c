@@ -163,6 +163,10 @@ void reset_option(void) {
 
 	reapply_cursor_style();
 	reapply_property();
+
+	reapply_window_layer_rules();
+	reapply_layer_layer_rules();
+
 	reapply_rootbg();
 	reapply_keyboard();
 	reapply_pointer();

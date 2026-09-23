@@ -35,6 +35,30 @@ enum { VERTICAL, HORIZONTAL };
 enum { UNFOLD, FOLD, INVALIDFOLD };
 enum { STATE_UNSPECIFIED = 0, STATE_ENABLED, STATE_DISABLED };
 
+/* Scene layer ids; the scene tree keeps one tree per layer. */
+enum {
+	LyrBg,
+	LyrBlur,
+	LyrBottom,
+	LyrTile,
+	LyrMaximize,
+	LyrFloat,
+	LyrTop,
+	LyrFullscreen,
+	LyrOverlay,
+	LyrSpecialDim,
+	LyrSpecialTile,
+	LyrSpecialMaximize,
+	LyrSpecialTop,
+	LyrSpecialFloat,
+	LyrSpecialFullscreen,
+	LyrFadeOut,
+	LyrSpecialOverlay,
+	LyrIMPopup,
+	LyrBlock,
+	NUM_LAYERS
+};
+
 enum animation_type {
 	ANIM_TYPE_UNSET = -1,
 	ANIM_TYPE_NONE = 0,
@@ -45,6 +69,8 @@ enum animation_type {
 };
 
 int32_t animation_type_from_string(const char *value);
+bool parse_layer_value(const char *value, int32_t *out);
+const char *layer_name(int32_t idx);
 
 enum tearing_mode {
 	TEARING_DISABLED = 0,
@@ -164,6 +190,7 @@ typedef struct {
 	KeyBinding globalkeybinding;
 	int32_t noautofocus;
 	int32_t nodim;
+	int32_t layer;
 } ConfigWinRule;
 
 typedef struct {
@@ -223,6 +250,7 @@ typedef struct {
 	int32_t no_blur;
 	int32_t no_animation;
 	int32_t no_shadow;
+	int32_t layer;
 } ConfigLayerRule;
 
 typedef struct {
