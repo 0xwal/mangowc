@@ -5035,6 +5035,8 @@ FuncType parse_func_name(char *func_name, Arg *arg, char *arg_value,
 		func = toggle_floating;
 	} else if (strcmp(func_name, "togglefullscreen") == 0) {
 		func = toggle_fullscreen;
+	} else if (strcmp(func_name, "toggleswallow") == 0) {
+		func = toggle_swallow;
 	} else if (strcmp(func_name, "togglefakefullscreen") == 0) {
 		func = toggle_fake_fullscreen;
 	} else if (strcmp(func_name, "toggleoverlay") == 0) {

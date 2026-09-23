@@ -101,6 +101,7 @@ bindr=Super,Super_L,spawn,rofi -show run
 | `togglefloating` | - | Toggle floating state. |
 | `toggle_all_floating` | - | Toggle all visible clients floating state. |
 | `togglefullscreen` | - | Toggle fullscreen. |
+| `toggleswallow` | - | Toggle whether the focused window swallows windows spawned inside it, and whether the focused window itself can be swallowed. |
 | `togglefakefullscreen` | - | Toggle "fake" fullscreen (remains constrained). |
 | `togglemaximizescreen` | - | Maximize window (keep decoration/bar). |
 | `toggleglobal` | - | Pin window to all tags. |

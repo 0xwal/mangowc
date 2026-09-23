@@ -102,6 +102,8 @@ windowrule-once=Parameter:Values,Parameter:Values,appid:Values,title:Values
 | `isterm` | integer | `0` / `1` | A new GUI window will replace the isterm window when it is opened |
 | `noswallow` | integer | `0` / `1` | The window will not replace the isterm window |
 
+For per-instance control at runtime, the keybindable `toggleswallow` dispatch flips `noswallow` on the focused window, as an alternative to the static `isterm`/`noswallow` rules above.
+
 ### Global & Special Windows
 
 | Parameter | Type | Values | Description |
@@ -158,6 +160,9 @@ windowrule=tags:9,monitor:HDMI-A-1,appid:discord
 # Terminal swallowdby setup
 windowrule=isterm:1,appid:st
 windowrule=noswallow:1,appid:foot
+
+# Toggle swallow on the focused window at runtime (alternative to rules above)
+bind=SUPER,T,toggleswallow
 
 # Disable client-side decorations
 windowrule=allow_csd:1,appid:firefox

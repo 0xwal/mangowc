@@ -1799,6 +1799,20 @@ int32_t toggle_floating(const Arg *arg) {
 	return 0;
 }
 
+int32_t toggle_swallow(const Arg *arg) {
+	if (!server.selected_monitor || server.selected_monitor->isoverview ||
+	    server.grab_client)
+		return 0;
+
+	Client *sel = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
+	if (!sel)
+		return 0;
+
+	sel->noswallow ^= 1;
+	printstatus(IPC_WATCH_ARRANGGE);
+	return 0;
+}
+
 int32_t toggle_fullscreen(const Arg *arg) {
 	if (!server.selected_monitor)
 		return 0;

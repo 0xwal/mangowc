@@ -760,7 +760,7 @@ Client *client_find_terminal(Client *w) {
 		return NULL;
 
 	wl_list_for_each(c, &server.focus_stack, flink) {
-		if (c->isterm && !c->swallowdby && c->pid &&
+		if (c->isterm && !c->noswallow && !c->swallowdby && c->pid &&
 			is_descendant_process(c->pid, w->pid)) {
 			return c;
 		}

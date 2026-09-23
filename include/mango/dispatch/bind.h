@@ -58,6 +58,7 @@ int32_t viewnext_have_client(const Arg *arg);
 int32_t view_cross_monitor(const Arg *arg);
 int32_t toggle_floating(const Arg *arg);
 int32_t toggle_fullscreen(const Arg *arg);
+int32_t toggle_swallow(const Arg *arg);
 int32_t toggle_maximize_screen(const Arg *arg);
 int32_t toggle_gaps(const Arg *arg);
 int32_t tag_monitor(const Arg *arg);
