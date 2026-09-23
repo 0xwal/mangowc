@@ -1462,6 +1462,10 @@ void apply_rule_properties(Client *c, const ConfigWinRule *r) {
 	APPLY_INT_PROP(c, r, animation_type_open);
 	APPLY_INT_PROP(c, r, animation_type_close);
 	APPLY_INT_PROP(c, r, noautofocus);
+
+	/* [fork] layer rule: forced scene layer override (-1 = auto) */
+	if (r->layer >= 0)
+		c->forced_layer = r->layer;
 }
 void set_float_malposition(Client *tc) {
 	Client *c = NULL;
@@ -1733,6 +1737,41 @@ void client_apply_rules(Client *c) {
 	if (c->isoverlay && c->scene) {
 		wlr_scene_node_reparent(&c->scene->node,
 								server.layers[client_target_layer(c)]);
+	}
+}
+
+/* [fork] layer rule: re-derive forced layers on config reload */
+void reapply_window_layer_rules(void) {
+	Client *c;
+	const char *appid, *title;
+	uint32_t i;
+	ConfigWinRule *r;
+
+	wl_list_for_each(c, &server.clients, link) {
+		if (c->iskilling)
+			continue;
+
+		c->forced_layer = -1;
+
+		if (!(appid = client_get_appid(c)))
+			appid = broken;
+		if (!(title = client_get_title(c)))
+			title = broken;
+
+		for (i = 0; i < config.window_rules_count; i++) {
+			r = &config.window_rules[i];
+
+			if (r->is_once)
+				continue;
+
+			if (!is_window_rule_matches(r, appid, title))
+				continue;
+
+			if (r->layer >= 0)
+				c->forced_layer = r->layer;
+		}
+
+		client_sync_layer(c);
 	}
 }
 
@@ -2114,6 +2153,7 @@ void init_client_properties(Client *c) {
 
 	c->custom_opacity = 0;
 	c->noautofocus = 0;
+	c->forced_layer = -1;
 }
 
 void handle_client_map(struct wl_listener *listener, void *data) {
@@ -4021,6 +4061,12 @@ void client_add_jump_label_node(Client *c) {
 // scene layer a client belongs to; shown scratchpads join the special
 // layers while the special workspace is active
 uint32_t client_target_layer(Client *c) {
+
+	/* [fork] layer rule: forced layer beats flags and special-workspace routing
+	 */
+	if (c->forced_layer >= 0)
+		return (uint32_t)c->forced_layer;
+
 	bool special_overlay = (c->tags & TAG0_MASK) ||
 						   (is_special_active(c->mon) && SCRATCHPAD_SHOWN(c));
 

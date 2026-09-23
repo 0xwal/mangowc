@@ -143,4 +143,9 @@ int32_t toggle_shadow(const Arg *arg);
 int32_t toggle_blur(const Arg *arg);
 
 int32_t send_bottom(const Arg *arg);
+
+/* [fork] layer keybind: client-window scene-layer actions */
+int32_t send_back(const Arg *arg);
+int32_t bring_front(const Arg *arg);
+int32_t set_layer(const Arg *arg);
 #endif

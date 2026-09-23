@@ -36,6 +36,8 @@ typedef struct LayerSurface {
 	int32_t noshadow;
 	int32_t animation_type_open;
 	int32_t animation_type_close;
+	/* [fork] layer rule: forced scene layer, -1 = auto */
+	int32_t forced_layer;
 	bool shield_when_capture;
 	bool need_output_flush;
 	bool being_unmapped;
@@ -54,6 +56,7 @@ void arrange_layer(Monitor *m, struct wl_list *list,
 void layer_focus(LayerSurface *l);
 void reset_exclusive_layers_focus(Monitor *m);
 void arrange_layers(Monitor *m);
+void reapply_layer_layer_rules(void);
 void iter_layer_scene_buffers(struct wlr_scene_buffer *buffer, int32_t sx,
 							  int32_t sy, void *user_data);
 void layer_flush_blur_background(LayerSurface *l);

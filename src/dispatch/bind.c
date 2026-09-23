@@ -4,6 +4,7 @@
 #include "mango/common/server.h"
 #include "mango/common/util.h"
 #include "mango/config/parse_config.h"
+#include "mango/draw/toast.h"
 #include "mango/ext-protocol/ext-workspace.h"
 #include "mango/ext-protocol/foreign-toplevel.h"
 #include "mango/ext-protocol/xdg-activation.h"
@@ -21,6 +22,7 @@
 #include "mango/manage/monitor.h"
 #include "mango/overview/overview.h"
 #include <fcntl.h>
+#include <glib.h>
 #include <unistd.h>
 #include <wlr/backend.h>
 #include <wlr/backend/headless.h>
@@ -2922,5 +2924,93 @@ int32_t send_bottom(const Arg *arg) {
 
 	wlr_scene_node_reparent(&c->scene->node, server.layers[LyrBottom]);
 
+	return 0;
+}
+
+/* [fork] layer keybind: client-only scene-layer cycle, bottom -> top, no wrap */
+static const uint32_t client_layer_cycle[] = {
+	LyrBottom, LyrTile, LyrMaximize, LyrFloat, LyrTop, LyrFullscreen,
+	LyrOverlay,
+};
+static const uint32_t client_layer_cycle_len =
+	sizeof(client_layer_cycle) / sizeof(client_layer_cycle[0]);
+
+/* [fork] layer keybind: cycle index nearest to (at or below) the client's
+ * effective layer; out-of-range values clamp to the cycle ends */
+static int32_t client_layer_cycle_index(Client *c) {
+	int32_t effective = (int32_t)client_target_layer(c);
+	int32_t idx = 0;
+	for (uint32_t i = 1; i < client_layer_cycle_len; i++) {
+		if ((int32_t)client_layer_cycle[i] <= effective)
+			idx = (int32_t)i;
+	}
+	return idx;
+}
+
+/* [fork] layer keybind: step the client one layer down (-1) or up (+1),
+ * clamped at the cycle ends */
+static void client_set_layer_step(Client *c, int dir) {
+	int32_t idx = client_layer_cycle_index(c);
+	int32_t last = (int32_t)client_layer_cycle_len - 1;
+	if (dir < 0 && idx > 0)
+		idx--;
+	else if (dir > 0 && idx < last)
+		idx++;
+	c->forced_layer = (int32_t)client_layer_cycle[idx];
+	client_sync_layer(c);
+}
+
+/* [fork] toast overlay: flash a layer toast centered on the client window
+ * showing the effective scene layer as "name (index)", e.g. "top (6)". */
+static void show_layer_toast(Client *c) {
+	if (!c || !c->mon)
+		return;
+	uint32_t layer = client_target_layer(c);
+	char *text = g_strdup_printf("%s (%u)", layer_name((int32_t)layer), layer);
+	if (!text)
+		return;
+	mango_toast_show_client_centered(c, text);
+	g_free(text);
+}
+
+int32_t send_back(const Arg *arg) {
+	if (!server.selected_monitor)
+		return 0;
+	Client *c = arg->tc ? arg->tc : server.selected_monitor->sel;
+	if (!c || !c->mon)
+		return 0;
+	client_set_layer_step(c, -1);
+	show_layer_toast(c);
+	return 0;
+}
+
+int32_t bring_front(const Arg *arg) {
+	if (!server.selected_monitor)
+		return 0;
+	Client *c = arg->tc ? arg->tc : server.selected_monitor->sel;
+	if (!c || !c->mon)
+		return 0;
+	client_set_layer_step(c, 1);
+	show_layer_toast(c);
+	return 0;
+}
+
+/* [fork] layer keybind: pin the client window to an absolute scene layer
+ * ("none"/"auto" -> -1, back to automatic); "0" is the no-arg sentinel the
+ * keybind parser fills in, mirroring the togglehdr convention */
+int32_t set_layer(const Arg *arg) {
+	if (!arg->v || !arg->v[0] || strcmp(arg->v, "0") == 0)
+		return 0;
+	if (!server.selected_monitor)
+		return 0;
+	Client *c = arg->tc ? arg->tc : server.selected_monitor->sel;
+	if (!c || !c->mon)
+		return 0;
+	int32_t layer;
+	if (!parse_layer_value(arg->v, &layer))
+		return 0;
+	c->forced_layer = layer;
+	client_sync_layer(c);
+	show_layer_toast(c);
 	return 0;
 }
