@@ -40,6 +40,48 @@ void arrange_layer(Monitor *m, struct wl_list *list,
 	}
 }
 
+void layer_update_border_geometry(LayerSurface *l) {
+	int32_t width, height;
+
+	if (!l->border)
+		return;
+
+	if (!l->border_enabled || config.borderpx == 0) {
+		wlr_scene_node_set_enabled(&l->border->node, false);
+		return;
+	}
+
+	layer_actual_size(l, &width, &height);
+
+	int32_t bw = (int32_t)config.borderpx;
+	wlr_scene_node_set_position(&l->border->node, -bw, -bw);
+	wlr_scene_rect_set_size(l->border, width + 2 * bw, height + 2 * bw);
+	wlr_scene_node_set_enabled(&l->border->node, true);
+}
+
+static void layer_update_border_color(LayerSurface *l) {
+	if (!l->border)
+		return;
+	bool focused = l->layer_surface->surface ==
+				   server.seat->keyboard_state.focused_surface;
+	wlr_scene_rect_set_color(l->border, focused ? config.focuscolor
+												: config.bordercolor);
+}
+
+void layer_refresh_border_colors(void) {
+	Monitor *m;
+	LayerSurface *l;
+	int32_t i;
+
+	wl_list_for_each(m, &server.monitors, link) {
+		for (i = 0; i < (int32_t)LENGTH(m->layers); i++) {
+			wl_list_for_each(l, &m->layers[i], link) {
+				layer_update_border_color(l);
+			}
+		}
+	}
+}
+
 void layer_focus(LayerSurface *l) {
 	client_focus(NULL, 0);
 	mango_im_relay_set_focus(server.input_method_relay,
@@ -96,6 +138,8 @@ void reset_exclusive_layers_focus(Monitor *m) {
 			if (l->layer_surface->surface !=
 				server.seat->keyboard_state.focused_surface)
 				layer_focus(l);
+			/* [fork] layer rule: border color follows exclusive focus */
+			layer_refresh_border_colors();
 			return;
 		}
 	}
@@ -103,6 +147,8 @@ void reset_exclusive_layers_focus(Monitor *m) {
 	if (neet_change_focus_to_client) {
 		client_focus(client_focus_top(server.selected_monitor), 1);
 	}
+	/* [fork] layer rule: border color follows exclusive focus */
+	layer_refresh_border_colors();
 }
 
 void arrange_layers(Monitor *m) {
@@ -191,8 +237,9 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
 	l->need_output_flush = true;
 	l->animation_type_open = ANIM_TYPE_UNSET;
 	l->animation_type_close = ANIM_TYPE_UNSET;
-	/* [fork] layer rule: forced layer reset on map */
+	/* [fork] layer rule: forced layer + border ring reset on map */
 	l->forced_layer = -1;
+	l->border_enabled = 0;
 
 	// Applies the layer rule.
 	for (ji = 0; ji < config.layer_rules_count; ji++) {
@@ -212,6 +259,9 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
 			/* [fork] layer rule: forced scene layer override (-1 = auto) */
 			if (r->layer >= 0)
 				l->forced_layer = r->layer;
+			/* [fork] layer rule: client-style border ring */
+			if (r->border >= 0)
+				l->border_enabled = r->border;
 		}
 	}
 
@@ -235,6 +285,13 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
 	wlr_scene_node_lower_to_bottom(&l->shield->node);
 	wlr_scene_node_set_enabled(&l->shield->node, false);
 
+	/* [fork] layer rule: client-style border ring */
+	l->border = wlr_scene_rect_create(l->scene, 0, 0, config.bordercolor);
+	wlr_scene_node_lower_to_bottom(&l->border->node);
+	wlr_scene_rect_set_corner_radii(l->border,
+									corner_radii_all(config.border_radius));
+	wlr_scene_node_set_enabled(&l->border->node, false);
+
 	// Initializes the shadow.
 	if (layer_surface->current.layer != ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM &&
 		layer_surface->current.layer != ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND) {
@@ -249,6 +306,10 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
 		l->blur = wlr_scene_blur_create(l->scene, 0, 0);
 		wlr_scene_node_lower_to_bottom(&l->blur->node);
 	}
+
+	/* [fork] layer rule: initial border ring geometry and color */
+	layer_update_border_geometry(l);
+	layer_update_border_color(l);
 
 	// Initializes the animation.
 	if (config.animations && config.layer_animations && !l->noanim) {
@@ -325,6 +386,10 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
 			l->need_output_flush = true;
 		}
 	}
+
+	/* [fork] layer rule: border ring follows the committed geometry */
+	layer_update_border_geometry(l);
+	layer_update_border_color(l);
 
 	if (config.blur && config.blur_layer) {
 
@@ -581,6 +646,11 @@ void handle_layer_surface_unmap(struct wl_listener *listener, void *data) {
 
 	pointer_process_motion(0, NULL, 0, 0, 0, 0);
 	layer_flush_blur_background(l);
+	/* [fork] layer rule: drop the border ring with the shadow */
+	if (l->border) {
+		wlr_scene_node_destroy(&l->border->node);
+		l->border = NULL;
+	}
 	wlr_scene_node_destroy(&l->shadow->node);
 	l->shadow = NULL;
 	l->being_unmapped = false;
@@ -601,6 +671,7 @@ void reapply_layer_layer_rules(void) {
 					continue;
 
 				l->forced_layer = -1;
+				l->border_enabled = 0;
 
 				for (ji = 0; ji < config.layer_rules_count; ji++) {
 					r = &config.layer_rules[ji];
@@ -612,6 +683,9 @@ void reapply_layer_layer_rules(void) {
 						/* [fork] layer rule: forced scene layer override (-1 = auto) */
 						if (r->layer >= 0)
 							l->forced_layer = r->layer;
+						/* [fork] layer rule: client-style border ring */
+						if (r->border >= 0)
+							l->border_enabled = r->border;
 					}
 				}
 
@@ -624,6 +698,10 @@ void reapply_layer_layer_rules(void) {
 				if (target != l->scene->node.parent) {
 					wlr_scene_node_reparent(&l->scene->node, target);
 				}
+
+				/* [fork] layer rule: border ring follows re-derived rules */
+				layer_update_border_geometry(l);
+				layer_update_border_color(l);
 			}
 		}
 	}

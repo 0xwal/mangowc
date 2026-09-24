@@ -16,6 +16,8 @@ typedef struct LayerSurface {
 	struct wlr_scene_tree *scene;
 	struct wlr_scene_tree *popups;
 	struct wlr_scene_rect *shield;
+	/* [fork] client-style border ring */
+	struct wlr_scene_rect *border;
 	struct wlr_scene_shadow *shadow;
 	struct wlr_scene_blur *blur;
 	struct wlr_scene_layer_surface_v1 *scene_layer;
@@ -34,6 +36,7 @@ typedef struct LayerSurface {
 	int32_t noblur;
 	int32_t noanim;
 	int32_t noshadow;
+	int32_t border_enabled; /* [fork] 0/1 = layerrule border */
 	int32_t animation_type_open;
 	int32_t animation_type_close;
 	/* [fork] layer rule: forced scene layer, -1 = auto */
@@ -57,6 +60,10 @@ void layer_focus(LayerSurface *l);
 void reset_exclusive_layers_focus(Monitor *m);
 void arrange_layers(Monitor *m);
 void reapply_layer_layer_rules(void);
+/* [fork] layer rule: border ring tracks surface geometry/animations */
+void layer_update_border_geometry(LayerSurface *l);
+/* [fork] layer rule: refresh border color after exclusive focus changes */
+void layer_refresh_border_colors(void);
 void iter_layer_scene_buffers(struct wlr_scene_buffer *buffer, int32_t sx,
 							  int32_t sy, void *user_data);
 void layer_flush_blur_background(LayerSurface *l);

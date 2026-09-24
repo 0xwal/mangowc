@@ -221,6 +221,8 @@ typedef struct {
 	int32_t noshadow;
 	/* [fork] layer rule: forced scene layer, -1 = auto */
 	int32_t layer;
+	/* [fork] layer rule: client-style border ring, -1 = unset */
+	int32_t border;
 } ConfigLayerRule;
 
 typedef struct {
