@@ -3966,7 +3966,8 @@ void client_add_jump_label_node(Client *c) {
 // scene layer a client belongs to; shown scratchpads join the special
 // layers while the special workspace is active
 uint32_t client_target_layer(Client *c) {
-	/* [fork] layer rule: forced layer beats flags and special-workspace routing */
+	/* [fork] layer rule: forced layer beats flags and special-workspace routing
+	 */
 	if (c->forced_layer >= 0)
 		return (uint32_t)c->forced_layer;
 

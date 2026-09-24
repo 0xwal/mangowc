@@ -66,7 +66,9 @@ enum { UP, DOWN, LEFT, RIGHT, UNDIR, ALLDIR, INDEX }; /* smartmovewin */
 #define OVERLOAD_FOCUSTOP_1(m) client_focus_top_impl(m, true)
 #define OVERLOAD_FOCUSTOP_2(m, a) client_focus_top_impl(m, a)
 #define GET_FOCUSTOP_MACRO(_1, _2, NAME, ...) NAME
-#define client_focus_top(...) GET_FOCUSTOP_MACRO(__VA_ARGS__, OVERLOAD_FOCUSTOP_2, OVERLOAD_FOCUSTOP_1)(__VA_ARGS__)
+#define client_focus_top(...)                                                  \
+	GET_FOCUSTOP_MACRO(__VA_ARGS__, OVERLOAD_FOCUSTOP_2,                       \
+					   OVERLOAD_FOCUSTOP_1)(__VA_ARGS__)
 
 struct Client {
 	/* Must keep these three elements in this order */

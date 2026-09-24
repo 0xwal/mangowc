@@ -64,8 +64,8 @@ static void layer_update_border_color(LayerSurface *l) {
 		return;
 	bool focused = l->layer_surface->surface ==
 				   server.seat->keyboard_state.focused_surface;
-	wlr_scene_rect_set_color(l->border, focused ? config.focuscolor
-												: config.bordercolor);
+	wlr_scene_rect_set_color(l->border,
+							 focused ? config.focuscolor : config.bordercolor);
 }
 
 void layer_refresh_border_colors(void) {
@@ -412,10 +412,10 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
 	l->mapped = layer_surface->surface->mapped;
 
 	if (layer_surface->current.committed & WLR_LAYER_SURFACE_V1_STATE_LAYER) {
-		/* [fork] layer rule: derive target layer from forced_layer or current layer */
+		/* [fork] layer rule: derive target layer from forced_layer or current
+		 * layer */
 		struct wlr_scene_tree *layer_target =
-			l->forced_layer >= 0 ? server.layers[l->forced_layer]
-								 : scene_layer;
+			l->forced_layer >= 0 ? server.layers[l->forced_layer] : scene_layer;
 		if (layer_target != l->scene->node.parent) {
 			wlr_scene_node_reparent(&l->scene->node, layer_target);
 			wl_list_remove(&l->link);
@@ -678,9 +678,9 @@ void reapply_layer_layer_rules(void) {
 					if (regex_match(r->layer_name,
 									l->layer_surface->namespace) &&
 						(r->monitor == NULL ||
-						 regex_match(r->monitor,
-									 l->mon->wlr_output->name))) {
-						/* [fork] layer rule: forced scene layer override (-1 = auto) */
+						 regex_match(r->monitor, l->mon->wlr_output->name))) {
+						/* [fork] layer rule: forced scene layer override (-1 =
+						 * auto) */
 						if (r->layer >= 0)
 							l->forced_layer = r->layer;
 						/* [fork] layer rule: client-style border ring */
@@ -694,7 +694,9 @@ void reapply_layer_layer_rules(void) {
 				if (l->forced_layer >= 0)
 					target = server.layers[l->forced_layer];
 				else
-					target = server.layers[layermap[l->layer_surface->current.layer]];
+					target =
+						server
+							.layers[layermap[l->layer_surface->current.layer]];
 				if (target != l->scene->node.parent) {
 					wlr_scene_node_reparent(&l->scene->node, target);
 				}

@@ -46,9 +46,8 @@ static void toast_show_at(struct Monitor *mon, const char *text, int mid_x,
 	if (mon->toast)
 		toast_teardown(mon->toast);
 
-	MangoJumpLabel *label =
-		mango_jump_label_node_create(server.layers[LyrOverlay],
-									 config.jumplabeldata);
+	MangoJumpLabel *label = mango_jump_label_node_create(
+		server.layers[LyrOverlay], config.jumplabeldata);
 	if (!label)
 		return;
 
@@ -89,7 +88,8 @@ void mango_toast_show(struct Monitor *mon, const char *text) {
 				  mon->m.y + mon->m.height / 2);
 }
 
-/* [fork] toast overlay: center on the client window (geom is layout-relative) */
+/* [fork] toast overlay: center on the client window (geom is layout-relative)
+ */
 void mango_toast_show_client_centered(struct Client *c, const char *text) {
 	if (!c || !c->mon || !text || !text[0])
 		return;

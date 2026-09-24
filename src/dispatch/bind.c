@@ -245,7 +245,7 @@ bool view_shift_tag_have_client(const Arg *arg, int dir);
 
 int32_t focus_direction(const Arg *arg) {
 	if (arg->i == INDEX && arg->ui > 0) {
-		Monitor* selmon = server.selected_monitor;
+		Monitor *selmon = server.selected_monitor;
 		if (!selmon)
 			return 0;
 		uint32_t idx = 1;
@@ -1803,7 +1803,7 @@ int32_t toggle_floating(const Arg *arg) {
 
 int32_t toggle_swallow(const Arg *arg) {
 	if (!server.selected_monitor || server.selected_monitor->isoverview ||
-	    server.grab_client)
+		server.grab_client)
 		return 0;
 
 	Client *sel = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
@@ -2927,10 +2927,11 @@ int32_t send_bottom(const Arg *arg) {
 	return 0;
 }
 
-/* [fork] layer keybind: client-only scene-layer cycle, bottom -> top, no wrap */
+/* [fork] layer keybind: client-only scene-layer cycle, bottom -> top, no wrap
+ */
 static const uint32_t client_layer_cycle[] = {
-	LyrBottom, LyrTile, LyrMaximize, LyrFloat, LyrTop, LyrFullscreen,
-	LyrOverlay,
+	LyrBottom, LyrTile,		  LyrMaximize, LyrFloat,
+	LyrTop,	   LyrFullscreen, LyrOverlay,
 };
 static const uint32_t client_layer_cycle_len =
 	sizeof(client_layer_cycle) / sizeof(client_layer_cycle[0]);

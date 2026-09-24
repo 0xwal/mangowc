@@ -16,7 +16,6 @@
 #include "mango/manage/layer.h"
 #include "mango/manage/misc.h"
 #include "mango/manage/monitor.h"
-#include "mango/manage/client.h"
 #include "mango/switcher/switcher.h"
 #include <linux/input-event-codes.h>
 #include <scenefx/types/wlr_scene.h>
@@ -1278,7 +1277,6 @@ void pointer_warp_to_monitor(Monitor *m) {
 	wlr_cursor_warp_closest(server.cursor, NULL, m->w.x + m->w.width / 2.0,
 							m->w.y + m->w.height / 2.0);
 
-
 	if (server.cursor_hidden) {
 		wl_event_source_timer_update(server.hide_cursor_source,
 									 config.cursor_hide_timeout * 1000);
@@ -1457,7 +1455,8 @@ bool pointer_process_button_press(struct wlr_pointer_button_event *event) {
 				layer_focus(l);
 			}
 		}
-		/* [fork] layer rule: border color follows click focus (client or layer) */
+		/* [fork] layer rule: border color follows click focus (client or layer)
+		 */
 		layer_refresh_border_colors();
 
 		// In overview mode, left click jumps and right click closes windows.
