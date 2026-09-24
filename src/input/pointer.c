@@ -1519,6 +1519,8 @@ bool pointer_process_button_press(struct wlr_pointer_button_event *event) {
 				layer_focus(l);
 			}
 		}
+		/* [fork] layer rule: border color follows click focus (client or layer) */
+		layer_refresh_border_colors();
 
 		// In overview mode, left click jumps and right click closes windows.
 		if (server.selected_monitor && server.selected_monitor->isoverview &&

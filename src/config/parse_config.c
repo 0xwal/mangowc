@@ -1621,6 +1621,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->noshadow = 0;
 		/* [fork] layer rule: forced scene layer override (-1 = auto) */
 		rule->layer = -1;
+		/* [fork] layer rule: client-style border ring 0/1 (-1 = unset) */
+		rule->border = -1;
 
 		bool parse_error = false;
 		char *token = strtok(value, ",");
@@ -1655,6 +1657,9 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 					rule->noanim = CLAMP_INT(atoi(val), 0, 1);
 				} else if (strcmp(key, "noshadow") == 0) {
 					rule->noshadow = CLAMP_INT(atoi(val), 0, 1);
+				} else if (strcmp(key, "border") == 0) {
+					/* [fork] layer rule: client-style border ring 0/1 */
+					rule->border = CLAMP_INT(atoi(val), 0, 1);
 				} else {
 					mango_error(false, WLR_ERROR,
 								"Unknown "
