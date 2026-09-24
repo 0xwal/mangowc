@@ -344,6 +344,9 @@ void fadeout_layer_animation_next_tick(LayerSurface *l) {
 								   height);
 	}
 
+	/* [fork] layer rule: border ring follows the animated box */
+	layer_update_border_geometry(l);
+
 	l->animation.current = (struct wlr_box){
 		.x = x,
 		.y = y,
@@ -496,6 +499,9 @@ void layer_animation_next_tick(LayerSurface *l) {
 		.width = animated.width,
 		.height = animated.height,
 	};
+
+	/* [fork] layer rule: border ring follows the animated box */
+	layer_update_border_geometry(l);
 
 	if (config.blur && config.blur_layer && !l->no_blur && l->blur)
 		wlr_scene_blur_set_size(l->blur, l->animation.current.width,

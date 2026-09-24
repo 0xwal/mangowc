@@ -251,6 +251,7 @@ typedef struct {
 	int32_t no_animation;
 	int32_t no_shadow;
 	int32_t layer;
+	int32_t border;
 } ConfigLayerRule;
 
 typedef struct {

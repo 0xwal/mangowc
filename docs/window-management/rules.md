@@ -266,6 +266,7 @@ layer_rule=layer_name:Values,Parameter:Values,Parameter:Values
 | `no_animation` | integer | `0` / `1` | Disable layer animation |
 | `no_shadow` | integer | `0` / `1` | Disable layer shadow |
 | `shield_when_capture`| integer | `0` / `1` | Shield layer when captured.(it is better to combination with `no_animation:1`) |
+| `border` | integer | `0` / `1` | Draw a client-style border ring on matched surfaces (width/radius from `borderpx`/`border_radius`, color follows keyboard focus) |
 
 > **Tip:** For animation types, see [Animations](/docs/visuals/animations#animation-types). For visual effects, see [Window Effects](/docs/visuals/effects).
 

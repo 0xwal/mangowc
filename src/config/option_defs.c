@@ -1360,6 +1360,7 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->no_animation = 0;
 		rule->no_shadow = 0;
 		rule->layer = -1;
+		rule->border = -1;
 
 		bool parse_error = false;
 		char *token = strtok(value, ",");
@@ -1395,6 +1396,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 					rule->no_animation = CLAMP_INT(atoi(val), 0, 1);
 				} else if (strcmp(key, "no_shadow") == 0) {
 					rule->no_shadow = CLAMP_INT(atoi(val), 0, 1);
+				} else if (strcmp(key, "border") == 0) {
+					rule->border = CLAMP_INT(atoi(val), 0, 1);
 				} else {
 					mango_error(false, WLR_ERROR,
 								"Unknown "
