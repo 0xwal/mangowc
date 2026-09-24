@@ -1176,7 +1176,8 @@ void pre_calculate_before_arrange(Monitor *m, bool want_animation,
 			c->tags = m->tagset[m->seltags];
 		}
 
-		if (from_view && m->sel == NULL && c->isglobal && VISIBLEON(c, m) && !c->noautofocus) {
+		if (from_view && m->sel == NULL && c->isglobal && VISIBLEON(c, m) &&
+			!c->noautofocus) {
 			client_focus(c, 1);
 		}
 

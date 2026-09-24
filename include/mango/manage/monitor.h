@@ -39,9 +39,9 @@ struct Monitor {
 	struct wlr_session_lock_surface_v1 *lock_surface;
 	struct wl_event_source *skip_frame_timeout;
 	struct mango_toast *toast; /* [fork] toast overlay: active toast or NULL */
-	struct wlr_box m;		  /* monitor area, layout-relative */
-	struct wlr_box w;		  /* window area, layout-relative */
-	struct wl_list layers[4]; /* LayerSurface::link */
+	struct wlr_box m;		   /* monitor area, layout-relative */
+	struct wlr_box w;		   /* window area, layout-relative */
+	struct wl_list layers[4];  /* LayerSurface::link */
 	uint32_t seltags;
 	uint32_t tagset[2];
 	bool skiping_frame;

@@ -1637,7 +1637,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 				trim_whitespace(val);
 
 				if (strcmp(key, "layer") == 0) {
-					/* [fork] layer rule: forced scene layer override (-1 = auto) */
+					/* [fork] layer rule: forced scene layer override (-1 =
+					 * auto) */
 					if (!parse_layer_value(val, &rule->layer))
 						parse_error = true;
 				} else if (strcmp(key, "layer_name") == 0) {
