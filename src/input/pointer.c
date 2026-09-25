@@ -1440,7 +1440,9 @@ bool pointer_process_button_press(struct wlr_pointer_button_event *event) {
 			if (c && c->scene && c->scene->node.enabled &&
 				VISIBLEON(c, c->mon) &&
 				(!client_is_unmanaged(c) || client_wants_focus(c)))
-				client_focus(c, 1);
+				/* [fork] noautofocus: click is the only channel that reaches
+				 * widgets */
+				client_focus_click(c);
 
 			if (surface != old_pointer_focus_surface) {
 				wlr_seat_pointer_notify_clear_focus(server.seat);

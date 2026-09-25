@@ -63,7 +63,8 @@ enum { UP, DOWN, LEFT, RIGHT, UNDIR, ALLDIR, INDEX }; /* smartmovewin */
 	((A)->isfullscreen || (A)->ismaximizescreen ||                             \
 	 (A)->overview_ismaximizescreenbak || (A)->overview_isfullscreenbak)
 
-#define OVERLOAD_FOCUSTOP_1(m) client_focus_top_impl(m, true)
+/* [fork] noautofocus: 1-arg form = auto-pick, skips noautofocus windows */
+#define OVERLOAD_FOCUSTOP_1(m) client_focus_top_impl(m, false)
 #define OVERLOAD_FOCUSTOP_2(m, a) client_focus_top_impl(m, a)
 #define GET_FOCUSTOP_MACRO(_1, _2, NAME, ...) NAME
 #define client_focus_top(...)                                                  \
@@ -385,6 +386,9 @@ void scene_buffer_apply_opacity(struct wlr_scene_buffer *buffer, int32_t sx,
 								int32_t sy, void *data);
 void client_set_opacity(Client *c, double opacity);
 void client_focus(Client *c, int32_t lift);
+/* [fork] noautofocus: the ONLY focus channel that may reach a noautofocus
+ * window */
+void client_focus_click(Client *c);
 void client_ensure_constraint(Client *c);
 void client_active(Client *c);
 void client_view_on_monitor(const Arg *arg, bool want_animation, Monitor *m,

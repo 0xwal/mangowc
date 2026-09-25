@@ -1735,6 +1735,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->noswallow = -1;
 		rule->noblur = -1;
 		rule->nofocus = -1;
+		rule->noautofocus =
+			-1; /* [fork] unset - reload must not clobber toggle_noautofocus */
 		rule->nodim = -1;
 		rule->nofadein = -1;
 		rule->nofadeout = -1;
@@ -1796,6 +1798,10 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 					rule->offsety = atoi(val);
 				} else if (strcmp(key, "nofocus") == 0) {
 					rule->nofocus = atoi(val);
+				} else if (strcmp(key, "noautofocus") == 0) {
+					/* [fork] noautofocus: skip auto/keyboard focus, mouse-click
+					 * only */
+					rule->noautofocus = atoi(val);
 				} else if (strcmp(key, "nofadein") == 0) {
 					rule->nofadein = atoi(val);
 				} else if (strcmp(key, "nofadeout") == 0) {
