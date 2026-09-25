@@ -33,7 +33,7 @@ windowrule-once=Parameter:Values,Parameter:Values,appid:Values,title:Values
 | `layer` | string / integer | `bg`, `blur`, `bottom`, `tile`, `maximize`, `float`, `top`, `fullscreen`, `fadeout`, `overlay`, `none`, or a layer index `0`-`7`, `14`, `15` | Pin the window to a specific scene layer, overriding the layer derived from the window state (`isoverlay`, `float_full_to_top`, special-workspace routing). Special-workspace layers (`special*`) are NOT supported and are rejected. `layer:none` maps to auto (like an absent key) and cannot unpin a window pinned by an earlier rule. Re-derived on config reload. `windowrule-once` layer pins apply at map time only and are not re-derived on reload (like other once-props) — the window returns to auto |
 | `isopensilent` | integer | `0` / `1` | Open without focus |
 | `istagsilent` | integer | `0` / `1` | Don't focus if client is not in current view tag |
-| `noautofocus` | integer | `0` / `1` | Skip this window during all focus changes; only a mouse click can focus it (widget windows) |
+| `noautofocus` | integer | `0` / `1` | Skip this window during all focus changes; only a mouse click can focus it (widget windows); also exempt from dimming |
 | `force_fakemaximize` | integer | `0` / `1` (default 1) | The state of client set to fake maximized |
 | `ignore_maximize` | integer | `0` / `1` (default 1) | Don't handle maximize request from client |
 | `ignore_minimize` | integer | `0` / `1` (default 1) | Don't handle minimize request from client |

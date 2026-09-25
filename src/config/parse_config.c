@@ -1385,7 +1385,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		} else {
 			convert_hex_to_rgba(config->overlaycolor, color);
 		}
-	} else if (strcmp(key, "noautofocuscolor") == 0) { /* [fork] noautofocus: widget border color */
+	} else if (strcmp(key, "noautofocuscolor") ==
+			   0) { /* [fork] noautofocus: widget border color */
 		int64_t color = parse_color(value);
 		if (color == -1) {
 			mango_error(false, WLR_ERROR,

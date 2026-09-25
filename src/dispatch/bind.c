@@ -2887,7 +2887,10 @@ int32_t toggle_noautofocus(const Arg *arg) {
 
 	focusedWindow->noautofocus ^= 1;
 
-	/* [fork] noautofocus: reflect widget border color immediately */
+	/* [fork] noautofocus: widget flag implies nodim, keep in lockstep */
+	focusedWindow->nodim = focusedWindow->noautofocus;
+
+	/* [fork] noautofocus: reflect border/dim colors immediately */
 	client_update_border_color(focusedWindow);
 
 	return 0;
