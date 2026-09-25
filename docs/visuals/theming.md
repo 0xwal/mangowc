@@ -49,6 +49,7 @@ You can also color-code windows based on their state:
 | Scratchpad | `scratchpadcolor` | `0x516c93ff` |
 | Global | `globalcolor` | `0xb153a7ff` |
 | Overlay | `overlaycolor` | `0x14a57cff` |
+| No-autofocus (focused) | `noautofocuscolor` | `0x8c5ad9ff` |
 
 > **Tip:** For scratchpad window sizing, see [Scratchpad](/docs/window-management/scratchpad) configuration.
 

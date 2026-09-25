@@ -1122,6 +1122,10 @@ float *get_border_color(Client *c) {
 		return config.bordercolor;
 	} else if (c->isurgent) {
 		return config.urgentcolor;
+	} else if (c->noautofocus && server.selected_monitor &&
+			   c == server.selected_monitor->sel) {
+		/* [fork] noautofocus: widget-flagged window border color */
+		return config.noautofocuscolor;
 	} else if (c->is_in_scratchpad && server.selected_monitor &&
 			   c == server.selected_monitor->sel) {
 		return config.scratchpadcolor;

@@ -499,6 +499,8 @@ typedef struct {
 	float scratchpadcolor[4];
 	float globalcolor[4];
 	float overlaycolor[4];
+	/* [fork] noautofocus: widget border color */
+	float noautofocuscolor[4];
 
 	int32_t log_level;
 	uint32_t capslock;

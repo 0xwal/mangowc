@@ -1385,6 +1385,17 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		} else {
 			convert_hex_to_rgba(config->overlaycolor, color);
 		}
+	} else if (strcmp(key, "noautofocuscolor") == 0) { /* [fork] noautofocus: widget border color */
+		int64_t color = parse_color(value);
+		if (color == -1) {
+			mango_error(false, WLR_ERROR,
+						"Invalid noautofocuscolor "
+						"format: %s\n",
+						value);
+			return false;
+		} else {
+			convert_hex_to_rgba(config->noautofocuscolor, color);
+		}
 	} else if (strcmp(key, "monitorrule") == 0) {
 		config->monitor_rules =
 			realloc(config->monitor_rules, (config->monitor_rules_count + 1) *
@@ -4473,6 +4484,11 @@ void set_value_default() {
 	config.overlaycolor[1] = 0xa5 / 255.0f;
 	config.overlaycolor[2] = 0x7c / 255.0f;
 	config.overlaycolor[3] = 1.0f;
+	/* [fork] noautofocus: widget border color */
+	config.noautofocuscolor[0] = 0x8c / 255.0f;
+	config.noautofocuscolor[1] = 0x5a / 255.0f;
+	config.noautofocuscolor[2] = 0xd9 / 255.0f;
+	config.noautofocuscolor[3] = 1.0f;
 
 	config.allow_fullscreen_opacity = 0;
 
