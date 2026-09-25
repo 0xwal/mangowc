@@ -544,6 +544,8 @@ typedef struct {
 	float globalcolor[4];
 	float overlaycolor[4];
 
+	float noautofocuscolor[4];
+
 	int32_t log_level;
 	uint32_t capslock;
 

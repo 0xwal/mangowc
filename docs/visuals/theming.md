@@ -49,6 +49,10 @@ You can also color-code windows based on their state:
 | Scratchpad | `scratchpad_color` | `0x516c93ff` |
 | Global | `global_color` | `0xb153a7ff` |
 | Overlay | `overlay_color` | `0x14a57cff` |
+ | Maximized | `maximizescreencolor` | `0x89aa61ff` |
+ | Scratchpad | `scratchpadcolor` | `0x516c93ff` |
+ | Global | `globalcolor` | `0xb153a7ff` |
+ | Overlay | `overlaycolor` | `0x14a57cff` |
 
 > **Tip:** For scratchpad window sizing, see [Scratchpad](/docs/window-management/scratchpad) configuration.
 
