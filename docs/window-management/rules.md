@@ -38,6 +38,7 @@ window_rule_once=Parameter:Values,Parameter:Values,app_id:Values,title:Values
  | `istagsilent` | integer | `0` / `1` | Don't focus if client is not in current view tag |
  | `force_fakemaximize` | integer | `0` / `1` (default 1) | The state of client set to fake maximized |
 | `noautofocus` | integer | `0` / `1` | Skip this window during all focus changes; only a mouse click can focus it (widget windows) |
+| `noautofocus` | integer | `0` / `1` | Skip this window during all focus changes; only a mouse click can focus it (widget windows); also exempt from dimming |
 | `ignore_maximize` | integer | `0` / `1` (default 1) | Don't handle maximize request from client |
 | `ignore_minimize` | integer | `0` / `1` (default 1) | Don't handle minimize request from client |
 | `force_tiled_state` | integer | `0` / `1` | Deceive the window into thinking it is tiling, so it better adheres to assigned dimensions |
