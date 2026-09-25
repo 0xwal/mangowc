@@ -1377,6 +1377,10 @@ void apply_rule_properties(Client *c, const ConfigWinRule *r) {
 	APPLY_INT_PROP(c, r, animation_type_close);
 	APPLY_INT_PROP(c, r, noautofocus);
 
+	/* [fork] noautofocus: widget flag implies nodim, keep in lockstep */
+	if (r->noautofocus >= 0)
+		c->nodim = c->noautofocus;
+
 	/* [fork] layer rule: forced scene layer override (-1 = auto) */
 	if (r->layer >= 0)
 		c->forced_layer = r->layer;
