@@ -2941,6 +2941,8 @@ void client_ensure_constraint(Client *c) {
 	}
 }
 
+static bool click_focus_in_progress; /* [fork] noautofocus */
+
 void client_focus(Client *c, int32_t lift) {
 
 	Client *last_focus_client = NULL;
@@ -2962,6 +2964,11 @@ void client_focus(Client *c, int32_t lift) {
 		return;
 
 	if (c && c->no_focus)
+		return;
+
+	/* [fork] noautofocus: strict mouse-only focus — every channel except
+	 * client_focus_click() is blocked for noautofocus windows */
+	if (c && c->noautofocus && !click_focus_in_progress)
 		return;
 
 	/* Raise client in stacking order if requested */
@@ -3120,6 +3127,13 @@ void client_focus(Client *c, int32_t lift) {
 	client_ensure_constraint(c);
 
 	pointer_check_confine_client();
+}
+
+/* [fork] noautofocus: mouse click is the only allowed focus channel */
+void client_focus_click(Client *c) {
+	click_focus_in_progress = true;
+	client_focus(c, 1);
+	click_focus_in_progress = false;
 }
 
 void client_active(Client *c) {

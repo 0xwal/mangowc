@@ -1545,7 +1545,9 @@ int32_t tag_monitor(const Arg *arg) {
 	Monitor *m = NULL, *cm = NULL, *oldmon = NULL;
 	if (!server.selected_monitor)
 		return 0;
-	Client *c = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
+	/* [fork] noautofocus: explicit user action on the focused window */
+	Client *c =
+		arg->tc ? arg->tc : client_focus_top(server.selected_monitor, true);
 
 	if (!c)
 		return 0;
@@ -1828,7 +1830,9 @@ int32_t tag_special_silent(const Arg *arg) {
 int32_t toggle_fake_fullscreen(const Arg *arg) {
 	if (!server.selected_monitor)
 		return 0;
-	Client *sel = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
+	/* [fork] noautofocus: explicit user action on the focused window */
+	Client *sel =
+		arg->tc ? arg->tc : client_focus_top(server.selected_monitor, true);
 	if (sel)
 		client_set_fake_fullscreen(sel, !sel->isfakefullscreen);
 	return 0;
@@ -1838,7 +1842,9 @@ int32_t toggle_floating(const Arg *arg) {
 	if (!server.selected_monitor || server.grab_client)
 		return 0;
 
-	Client *sel = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
+	/* [fork] noautofocus: explicit user action on the focused window */
+	Client *sel =
+		arg->tc ? arg->tc : client_focus_top(server.selected_monitor, true);
 
 	if (server.selected_monitor && server.selected_monitor->isoverview)
 		return 0;
@@ -1863,7 +1869,9 @@ int32_t toggle_swallow(const Arg *arg) {
 		server.grab_client)
 		return 0;
 
-	Client *sel = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
+	/* [fork] noautofocus: explicit user action on the focused window */
+	Client *sel =
+		arg->tc ? arg->tc : client_focus_top(server.selected_monitor, true);
 	if (!sel)
 		return 0;
 
@@ -1876,7 +1884,9 @@ int32_t toggle_fullscreen(const Arg *arg) {
 	if (!server.selected_monitor)
 		return 0;
 
-	Client *sel = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
+	/* [fork] noautofocus: explicit user action on the focused window */
+	Client *sel =
+		arg->tc ? arg->tc : client_focus_top(server.selected_monitor, true);
 	if (!sel)
 		return 0;
 
@@ -1931,7 +1941,9 @@ int32_t toggle_maximize_screen(const Arg *arg) {
 	if (!server.selected_monitor)
 		return 0;
 
-	Client *sel = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
+	/* [fork] noautofocus: explicit user action on the focused window */
+	Client *sel =
+		arg->tc ? arg->tc : client_focus_top(server.selected_monitor, true);
 	if (!sel)
 		return 0;
 
@@ -1968,7 +1980,9 @@ int32_t toggle_tag(const Arg *arg) {
 		return 0;
 
 	uint32_t newtags;
-	Client *sel = arg->tc ? arg->tc : client_focus_top(server.selected_monitor);
+	/* [fork] noautofocus: explicit user action on the focused window */
+	Client *sel =
+		arg->tc ? arg->tc : client_focus_top(server.selected_monitor, true);
 	if (!sel)
 		return 0;
 	if (sel->mon && sel->mon->isoverview)

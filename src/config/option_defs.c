@@ -1473,6 +1473,7 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 		rule->confine_pointer = -1;
 		rule->no_blur = -1;
 		rule->no_focus = -1;
+		rule->noautofocus = -1;
 		rule->no_fade_in = -1;
 		rule->no_fade_out = -1;
 		rule->no_force_center = -1;
@@ -1534,6 +1535,8 @@ bool parse_option(Config *config, char *key, char *value, int line_number) {
 					rule->offsety = atoi(val);
 				} else if (strcmp(key, "no_focus") == 0) {
 					rule->no_focus = atoi(val);
+				} else if (strcmp(key, "noautofocus") == 0) {
+					rule->noautofocus = atoi(val);
 				} else if (strcmp(key, "no_fade_in") == 0) {
 					rule->no_fade_in = atoi(val);
 				} else if (strcmp(key, "no_fade_out") == 0) {
