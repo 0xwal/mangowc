@@ -2887,12 +2887,8 @@ int32_t toggle_noautofocus(const Arg *arg) {
 
 	focusedWindow->noautofocus ^= 1;
 
-	if (focusedWindow->noautofocus) {
-		focusedWindow->isoverlay = focusedWindow->noautofocus;
-		focusedWindow->isfloating = focusedWindow->noautofocus;
-
-		client_set_floating(focusedWindow, focusedWindow->isfloating);
-	}
+	/* [fork] noautofocus: reflect widget border color immediately */
+	client_update_border_color(focusedWindow);
 
 	return 0;
 }
